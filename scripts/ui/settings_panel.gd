@@ -135,10 +135,19 @@ func _build_controls() -> void:
 	_toggle(page, "Invert horizontal look", Settings.invert_x, func(v: bool) -> void: Settings.invert_x = v)
 	_toggle(page, "Invert vertical look", Settings.invert_y, func(v: bool) -> void: Settings.invert_y = v)
 	_toggle(page, "Camera follows movement", Settings.camera_assist, func(v: bool) -> void: Settings.camera_assist = v)
+	var t_row := _row(page, "Touch controls")
+	var touch := OptionButton.new()
+	for i in Settings.TOUCH_MODES.size():
+		touch.add_item(Settings.TOUCH_MODES[i], i)
+	touch.select(Settings.touch_controls)
+	touch.item_selected.connect(func(i: int) -> void: Settings.touch_controls = i)
+	t_row.add_child(touch)
+	_slider(page, "Touch button size", Settings.touch_size, 0.7, 1.5, 0.05, func(v: float) -> void:
+		Settings.touch_size = v)
 	var help := Label.new()
 	help.theme_type_variation = &"HintLabel"
 	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	help.text = "Move  WASD / Left stick      Look  Mouse / Right stick      Hop  Space / A\nInteract  E / X      Scan  Q / Y      Boost  Shift / RT      Journal  J / Back      Pause  Esc / Start"
+	help.text = "Move  WASD / Left stick      Look  Mouse / Right stick      Hop  Space / A\nInteract  E / X      Scan  Q / Y      Boost  Shift / RT      Journal  J / Back      Pause  Esc / Start\nTouch: left stick to move (push past its rim to boost), drag to look, pinch to zoom, tap a prompt to use it."
 	page.add_child(help)
 
 

@@ -70,6 +70,15 @@ func _ready() -> void:
 		set_target(get_node(target_path) as Node3D)
 	Settings.changed.connect(_apply_settings)
 	_apply_settings()
+	get_viewport().size_changed.connect(_update_aspect)
+	_update_aspect()
+
+
+## Portrait screens (a tablet held upright) keep the horizontal field of view instead of the
+## vertical one, so the view does not shrink to a narrow slot around the robot.
+func _update_aspect() -> void:
+	var view := get_viewport().get_visible_rect().size
+	camera.keep_aspect = Camera3D.KEEP_WIDTH if view.y > view.x else Camera3D.KEEP_HEIGHT
 
 
 func set_target(node: Node3D) -> void:
@@ -129,6 +138,23 @@ func _unhandled_input(event: InputEvent) -> void:
 			desired_distance = clampf(desired_distance - zoom_step, min_distance, max_distance)
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			desired_distance = clampf(desired_distance + zoom_step, min_distance, max_distance)
+
+
+## Touch look (TouchControls): `delta` is the drag as a fraction of the screen size.
+func touch_look(delta: Vector2) -> void:
+	if not input_enabled or _cinematic:
+		return
+	var sens := Settings.mouse_sensitivity
+	yaw -= delta.x * TouchControls.LOOK_YAW * sens * (-1.0 if Settings.invert_x else 1.0)
+	pitch -= delta.y * TouchControls.LOOK_PITCH * sens * (-1.0 if Settings.invert_y else 1.0)
+	_idle_input_time = 0.0
+
+
+## Pinch zoom (TouchControls): `factor` < 1 moves the camera closer.
+func touch_zoom(factor: float) -> void:
+	if not input_enabled or _cinematic:
+		return
+	desired_distance = clampf(desired_distance * factor, min_distance, max_distance)
 
 
 func _process(delta: float) -> void:

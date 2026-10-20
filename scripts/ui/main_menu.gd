@@ -315,7 +315,9 @@ func _build_ui() -> void:
 		_buttons.add_child(_spacer(12))
 	_new_game = _item("New Game", _on_new_game)
 	_item("Settings", _on_settings)
-	_item("Quit", func() -> void: get_tree().quit())
+	# A browser tab cannot be closed by the game (quitting would only freeze the page).
+	if not OS.has_feature("web"):
+		_item("Quit", func() -> void: get_tree().quit())
 
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)

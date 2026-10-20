@@ -12,9 +12,16 @@ const PAD := {
 	"interact": "X", "scan": "Y", "hop": "A", "boost": "RT", "pause": "Start", "journal": "Back",
 	"move": "L-Stick", "look": "R-Stick",
 }
+## Names of the on-screen touch buttons (see TouchControls).
+const TOUCH := {
+	"interact": "USE", "scan": "SCAN", "hop": "HOP", "boost": "BOOST", "pause": "Pause", "journal": "Journal",
+	"move": "Left stick", "look": "Drag",
+}
 
 
 static func label(action: String) -> String:
+	if TouchControls.active:
+		return TOUCH.get(action, action)
 	return (PAD if using_gamepad else KEYS).get(action, action)
 
 

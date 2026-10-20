@@ -59,9 +59,11 @@ func _ready() -> void:
 		SaveSystem.save_game()
 		close()
 		SceneRouter.go_to_menu())
-	_button(box, "Quit game", func() -> void:
-		SaveSystem.save_game()
-		get_tree().quit())
+	# A browser tab cannot be closed by the game (quitting would only freeze the page).
+	if not OS.has_feature("web"):
+		_button(box, "Quit game", func() -> void:
+			SaveSystem.save_game()
+			get_tree().quit())
 	_settings = SettingsPanel.new()
 	_settings.visible = false
 	center.add_child(_settings)

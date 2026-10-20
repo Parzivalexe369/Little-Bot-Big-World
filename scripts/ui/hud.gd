@@ -66,6 +66,9 @@ var _area := &""
 var _area_timer := 0.0
 var _caption_font: Font
 var _flash := 0.0
+var _touch: TouchControls
+var _touch_layout := false
+var _touch_bottom := 0.0
 var _count_re := RegEx.create_from_string("\\s*\\(\\d+/\\d+\\)")
 
 
@@ -86,6 +89,10 @@ func _ready() -> void:
 	_build_banner()
 	_build_discovery()
 	_build_hint()
+	_touch = TouchControls.new()
+	_touch.process_mode = Node.PROCESS_MODE_PAUSABLE
+	_touch.hud = self
+	add_child(_touch)
 	GameState.fragment_collected.connect(_on_fragment)
 	Quests.objective_changed.connect(_on_objective_changed)
 	Quests.objective_progress.connect(func(_id: StringName, text: String) -> void: _set_objective(text, false))
@@ -103,6 +110,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	if TouchControls.active != _touch_layout or (_touch_layout and _touch.reserved_bottom() != _touch_bottom):
+		_apply_touch_layout(TouchControls.active)
 	if player:
 		_scan.ratio = player.scan_ready_ratio
 		_scan.key_text = InputGlyphs.label("scan")
@@ -525,6 +534,31 @@ func set_hud_visible(value: bool, duration: float = 0.5) -> void:
 	for node: CanvasItem in [_objective_panel, _energy_box, _scan_box, _prompt_panel, _prompt_marker]:
 		var shown := 1.0 if node != _prompt_panel and node != _prompt_marker else 0.0
 		tween.tween_property(node, "modulate:a", shown if value else 0.0, duration)
+
+
+func is_hud_shown() -> bool:
+	return _hud_visible
+
+
+## Screen rect of the interaction prompt while it is showing (touch: tapping it uses it).
+func prompt_rect() -> Rect2:
+	return Rect2(_prompt_panel.position, _prompt_panel.size) if _prompt_panel.modulate.a > 0.3 else Rect2()
+
+
+## True while something can be used (lights up the touch USE button).
+func prompt_active() -> bool:
+	return _prompt_panel.modulate.a > 0.3 and not _prompt_lock.visible
+
+
+## Touch controls take the bottom corners: the scan ring moves onto the SCAN button and the
+## toasts move above the stick.
+func _apply_touch_layout(on: bool) -> void:
+	_touch_layout = on
+	_touch_bottom = _touch.reserved_bottom()
+	_scan_box.visible = not on
+	var bottom := -_touch_bottom if on else -MARGIN
+	_toasts.offset_bottom = bottom
+	_toasts.offset_top = bottom - 230.0
 
 
 func set_letterbox(on: bool, duration: float = 0.8) -> void:

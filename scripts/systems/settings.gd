@@ -9,6 +9,7 @@ const RESOLUTIONS: Array[Vector2i] = [
 	Vector2i(1920, 1080), Vector2i(2560, 1440), Vector2i(3840, 2160),
 ]
 const QUALITY_NAMES := ["Low", "Medium", "High"]
+const TOUCH_MODES := ["Auto", "Always", "Off"]
 
 var master_volume := 0.85
 var music_volume := 0.6
@@ -18,6 +19,10 @@ var mouse_sensitivity := 1.0
 var invert_x := false
 var invert_y := false
 var camera_assist := true
+## On-screen touch controls: 0 Auto (shown on touch screens until a keyboard, mouse or
+## gamepad is used), 1 Always, 2 Off. touch_size scales the buttons.
+var touch_controls := 0
+var touch_size := 1.0
 var fov := 70.0
 var fullscreen := false
 var resolution := Vector2i(1600, 900)
@@ -28,6 +33,8 @@ var render_scale := 0.8 if OS.has_feature("web") else 1.0
 
 
 func _ready() -> void:
+	if OS.has_feature("web"):
+		render_scale = _web_render_scale()
 	load_settings()
 	apply_audio()
 	# Display changes need a running window; defer one frame.
@@ -47,6 +54,8 @@ func load_settings() -> void:
 	invert_x = bool(cfg.get_value("controls", "invert_x", invert_x))
 	invert_y = bool(cfg.get_value("controls", "invert_y", invert_y))
 	camera_assist = bool(cfg.get_value("controls", "camera_assist", camera_assist))
+	touch_controls = clampi(int(cfg.get_value("controls", "touch_controls", touch_controls)), 0, 2)
+	touch_size = clampf(cfg.get_value("controls", "touch_size", touch_size), 0.7, 1.5)
 	fov = clampf(cfg.get_value("video", "fov", fov), 55.0, 95.0)
 	fullscreen = bool(cfg.get_value("video", "fullscreen", fullscreen))
 	var res: Variant = cfg.get_value("video", "resolution", resolution)
@@ -55,6 +64,14 @@ func load_settings() -> void:
 	vsync = bool(cfg.get_value("video", "vsync", vsync))
 	quality = clampi(int(cfg.get_value("video", "quality", quality)), 0, 2)
 	render_scale = clampf(cfg.get_value("video", "render_scale", render_scale), 0.5, 1.0)
+
+
+## Default 3D resolution in a browser: about 1.4 million pixels (high-density tablet screens
+## have three times that), at most 80%; the 2D interface stays at full sharpness.
+func _web_render_scale() -> float:
+	var px := DisplayServer.window_get_size()
+	var pixels := maxf(float(px.x * px.y), 1.0)
+	return snappedf(clampf(sqrt(1400000.0 / pixels), 0.5, 0.8), 0.05)
 
 
 func save_settings() -> void:
@@ -67,6 +84,8 @@ func save_settings() -> void:
 	cfg.set_value("controls", "invert_x", invert_x)
 	cfg.set_value("controls", "invert_y", invert_y)
 	cfg.set_value("controls", "camera_assist", camera_assist)
+	cfg.set_value("controls", "touch_controls", touch_controls)
+	cfg.set_value("controls", "touch_size", touch_size)
 	cfg.set_value("video", "fov", fov)
 	cfg.set_value("video", "fullscreen", fullscreen)
 	cfg.set_value("video", "resolution", resolution)

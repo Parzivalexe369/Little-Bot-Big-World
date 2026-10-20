@@ -27,13 +27,23 @@ few minutes.
 python tools/build_web.py
 ```
 
-This builds the game for browsers into `build/web/` (about 120 MB: `index.pck` 82 MB,
-`index.wasm` 38 MB, no file over GitHub's 100 MB limit). It works on a temporary copy of the
-project, so the desktop game keeps its full-quality assets. The copy gets lighter textures
-(sci-fi scans 1024 px, garden scans 512 px, terrain layers 768 px) and a few fixes for the
-browser renderer (WebGL 2). The script's header lists them all. The build is
-single-threaded, so it needs no special server headers. `build/web/` also gets `.nojekyll`
-(GitHub Pages) and `vercel.json` (Vercel: static site, no build step).
+This builds the game for browsers into `build/web/`, about 200 MB in total with no file over
+GitHub's 100 MB limit:
+- `index.wasm` (38 MB) is the engine.
+- `index.pck` (82 MB) holds the game data with desktop texture formats (S3TC/BPTC).
+- `index.mobile.pck` (82 MB) holds the same data with the formats iPad, iPhone and Android
+  graphics read (ETC2/ASTC). `index.html` loads the pack the device can read, so each player
+  downloads only one; add `?pack=mobile` or `?pack=desktop` to the address to force a choice.
+
+The script works on a temporary copy of the project, so the desktop game keeps its
+full-quality assets. The copy gets lighter textures (sci-fi scans 1024 px, garden scans
+512 px, terrain layers 768 px) and a few fixes for the browser renderer (WebGL 2); the
+script's header lists them all. The build is single-threaded, so it needs no special server
+headers. `build/web/` also gets `.nojekyll` (GitHub Pages) and `vercel.json` (Vercel: static
+site, no build step).
+
+On an iPad, the game plays with the touch controls (see Controls). In Safari, Share → "Add
+to Home Screen" starts it full screen from the home screen, without the browser bars.
 
 To try it locally, serve the folder over HTTP. Opening `index.html` as a file does not work.
 
@@ -68,8 +78,12 @@ Hosting that branch:
 
 **What to expect in a browser**
 
-- The browser version uses the Low graphics preset at 80% render scale. Volumetric fog,
-  bounce light, SSAO and shadows from the sci-fi lamps are off.
+- The browser version uses the Low graphics preset. Volumetric fog, bounce light, SSAO and
+  shadows from the sci-fi lamps are off.
+- The 3D view renders at about 1.4 million pixels by default: 80% on a 1080p screen, about
+  60% on an iPad's high-density screen. Menus and text stay sharp, and Settings → Graphics
+  → Render scale changes it.
+- "Quit" is hidden in browsers, because a web page cannot close its own tab.
 - On the first visit, the browser compiles the game's shaders while the loading screen is
   up. On Windows this took about a minute for the garden and two to three minutes for the
   sci-fi facility on a laptop with integrated graphics.
@@ -79,17 +93,22 @@ Hosting that branch:
 
 ## Controls
 
-| Action | Keyboard / Mouse | Gamepad |
-|---|---|---|
-| Move | WASD / Arrow keys | Left stick |
-| Look | Mouse | Right stick |
-| Zoom | Mouse wheel | LB / RB |
-| Hover hop (hold for higher) | Space | A |
-| Boost | Shift | RT / L3 |
-| Interact | E (or F) | X |
-| Scan | Q | Y |
-| Journal | J / Tab | Back |
-| Pause | Esc | Start |
+| Action | Keyboard / Mouse | Gamepad | Touch (iPad, phones) |
+|---|---|---|---|
+| Move | WASD / Arrow keys | Left stick | Stick on the left half of the screen |
+| Look | Mouse | Right stick | Drag anywhere else |
+| Zoom | Mouse wheel | LB / RB | Pinch |
+| Hover hop (hold for higher) | Space | A | HOP button |
+| Boost | Shift | RT / L3 | BOOST button, or push the stick past its rim |
+| Interact | E (or F) | X | USE button, or tap the prompt |
+| Scan | Q | Y | SCAN button (shows its cooldown) |
+| Journal | J / Tab | Back | Book button (top) |
+| Pause | Esc | Start | Pause button (top) |
+
+The touch controls (`scripts/ui/touch_controls.gd`, part of the HUD) appear on touch screens
+and hide as soon as a keyboard, mouse or gamepad is used. Settings → Controls has
+"Touch controls" (Auto / Always / Off) and "Touch button size". `tools/touch_test_runner.tscn`
+drives them with injected touch events (add `facility` after `--` for the sci-fi areas).
 
 ## The journey
 
@@ -209,6 +228,7 @@ Key ideas:
 | `tools/facility_perf.sh` | GPU/CPU frame time at six spots in the sci-fi areas (`quality=N` optional) |
 | `godot --headless --path . --export-release "macOS" build/macos/LittleBotBigWorld.zip` | Universal macOS app (Intel + Apple Silicon, ad-hoc signed); see `build/macos/HOW_TO_RUN_ON_MAC.txt` |
 | `python tools/build_web.py [--test]` | Browser build with lighter textures in `build/web/` (see "Browser version" above) |
+| `godot --path . res://tools/touch_test_runner.tscn -- [shot_dir] [facility]` | Touch controls test: injected taps, stick, look, pinch, buttons, menus (windowed) |
 | `python tools/gen_facility_levels.py` | Regenerate the facility scenes (checkpoints, fragments, discoveries) |
 | `python tools/audio/generate_scifi_audio.py` | Synthesize the sci-fi sounds (leaves the original audio untouched) |
 | `tools/capture.sh <shots.json>` | Screenshots from scripted viewpoints (`docs/captures/baseline.json` = the before/after views) |
