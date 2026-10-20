@@ -35,6 +35,8 @@ var render_scale := 0.8 if OS.has_feature("web") else 1.0
 func _ready() -> void:
 	if OS.has_feature("web"):
 		render_scale = _web_render_scale()
+		get_tree().root.size_changed.connect(_update_web_ui_scale)
+		_update_web_ui_scale.call_deferred()
 	load_settings()
 	apply_audio()
 	# Display changes need a running window; defer one frame.
@@ -72,6 +74,19 @@ func _web_render_scale() -> float:
 	var px := DisplayServer.window_get_size()
 	var pixels := maxf(float(px.x * px.y), 1.0)
 	return snappedf(clampf(sqrt(1400000.0 / pixels), 0.5, 0.8), 0.05)
+
+
+## The interface is laid out for a 1920 x 1080 screen and scaled to fit. On a tablet held
+## upright that leaves text only a few pixels tall, so in browsers the interface is enlarged
+## until one layout unit is at least 0.62 CSS pixels (desktop screens and a landscape iPad
+## are already there and stay unchanged).
+func _update_web_ui_scale() -> void:
+	var root := get_tree().root
+	var px := Vector2(root.size)
+	var base := Vector2(ProjectSettings.get_setting("display/window/size/viewport_width", 1920), ProjectSettings.get_setting("display/window/size/viewport_height", 1080))
+	var fit := minf(px.x / base.x, px.y / base.y)
+	var css_per_unit := fit / maxf(DisplayServer.screen_get_scale(), 1.0)
+	root.content_scale_factor = clampf(0.62 / maxf(css_per_unit, 0.01), 1.0, 1.8)
 
 
 func save_settings() -> void:

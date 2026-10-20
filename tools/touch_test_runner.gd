@@ -38,7 +38,20 @@ func _win(p: Vector2) -> Vector2:
 	return get_tree().root.get_final_transform() * p
 
 
+## Browsers (iPad Safari included) also report every finger as real mouse motion (pointer
+## events, device 0) just before the touch event; mirror that like a real device does.
+func _mirror_mouse(p: Vector2, relative: Vector2) -> void:
+	var m := InputEventMouseMotion.new()
+	m.device = 0
+	m.position = _win(p)
+	m.global_position = m.position
+	m.relative = relative
+	m.screen_relative = relative
+	Input.parse_input_event(m)
+
+
 func _touch(index: int, p: Vector2, pressed: bool) -> void:
+	_mirror_mouse(p, Vector2.ZERO)
 	var e := InputEventScreenTouch.new()
 	e.index = index
 	e.position = _win(p)
@@ -50,10 +63,12 @@ func _drag(index: int, from: Vector2, to: Vector2, steps := 8) -> void:
 	var prev := from
 	for i in range(1, steps + 1):
 		var p := from.lerp(to, float(i) / steps)
+		_mirror_mouse(p, _win(p) - _win(prev))
 		var e := InputEventScreenDrag.new()
 		e.index = index
 		e.position = _win(p)
-		e.relative = _win(p) - _win(prev)
+		# Like the browser, "relative" is unreliable with several fingers; send a wrong one.
+		e.relative = (_win(p) - _win(prev)) * 3.0
 		e.screen_relative = e.relative
 		Input.parse_input_event(e)
 		prev = p
@@ -71,7 +86,8 @@ func _run() -> void:
 	get_window().size = Vector2i(1600, 900)
 	# Autosaves (waking up) go to a test slot, so the real save is untouched.
 	SaveSystem.use_slot("user://touch_test_save.json")
-	Settings.touch_controls = 1
+	# Auto mode, as on a real tablet (where a touch screen is detected at start).
+	Settings.touch_controls = 0
 	if args.has("facility"):
 		await _run_facility()
 		return
@@ -83,7 +99,9 @@ func _run() -> void:
 	hud = world.get("hud") as Hud
 	await _frames(90)
 	tc = hud.get("_touch") as TouchControls
-	_check(tc != null and TouchControls.active, "touch controls exist and are active (Always)")
+	TouchControls.active = true
+	await _frames(5)
+	_check(tc != null and TouchControls.active, "touch controls exist and are active (Auto, touch screen)")
 	_check(tc._mode() == 1, "intro: only USE shown while the robot sleeps (mode %d)" % tc._mode())
 	_check(InputGlyphs.label("interact") == "USE", "prompt shows the touch label (%s)" % InputGlyphs.label("interact"))
 	await _shot("touch_01_intro")
@@ -236,6 +254,8 @@ func _run_facility() -> void:
 		await _frames(5)
 	await _frames(60)
 	tc = hud.get("_touch") as TouchControls
+	TouchControls.active = true
+	await _frames(5)
 	_check(player.input_enabled and tc._mode() == 2, "facility: touch controls shown in play (mode %d)" % tc._mode())
 	var start := player.global_position
 	var home: Vector2 = tc._stick_home

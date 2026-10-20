@@ -23,6 +23,11 @@ const LOOK_YAW := 3.4
 const LOOK_PITCH := 2.2
 ## The stick boosts once dragged this far past its rim.
 const BOOST_RIM := 1.15
+## Mouse events this soon after a touch are the browser mirroring the fingers.
+const TOUCH_GRACE_MS := 1000
+## The stick keeps this far (CSS px) from the screen edges: Safari's swipe-back edge and the
+## iPad home-bar gesture area would take touches there.
+const EDGE_CSS := 44.0
 const FILL := Color(0.05, 0.06, 0.09, 0.42)
 const FILL_PRESSED := Color(0.5, 0.94, 1.0, 0.34)
 const EDGE := Color(1, 1, 1, 0.28)
@@ -60,6 +65,9 @@ var _look_on_prompt := false
 var _pinch_index := -1
 var _pinch_dist := 0.0
 var _touch_pos := {}
+var _down := {}
+var _last_touch_ms := -100000
+var _stick_grab := Vector2.ZERO
 var _pulse := 0.0
 
 
@@ -116,6 +124,8 @@ func _set_active(value: bool) -> void:
 # --- Input ------------------------------------------------------------------------------
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		_last_touch_ms = Time.get_ticks_msec()
 	_observe(event)
 	if not active:
 		return
@@ -125,89 +135,129 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventScreenDrag:
 		_on_drag(event as InputEventScreenDrag)
 		get_viewport().set_input_as_handled()
-	elif event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
-		# Taps also arrive as emulated mouse clicks; in play they would only try to capture
-		# the mouse. Menus (which pause the game) still get them, since this node pauses too.
+	elif event is InputEventMouse and (event.device == InputEvent.DEVICE_ID_EMULATION or _touch_recent()):
+		# Fingers also arrive as mouse input: emulated clicks for taps and, in browsers, real
+		# mouse motion (pointer events) for every drag. In play they would only move or try to
+		# capture the mouse. Menus still get them, since this node pauses with the game.
 		get_viewport().set_input_as_handled()
 
 
-## Touch switches to touch controls; a real keyboard, mouse or gamepad switches back.
+## A finger is down, or was a moment ago. Browsers report every finger as mouse input too
+## (pointer events), just before or after the touch events, so mouse events in that window
+## are the fingers, not a real mouse.
+func _touch_recent() -> bool:
+	return not _down.is_empty() or Time.get_ticks_msec() - _last_touch_ms < TOUCH_GRACE_MS
+
+
+## Touch switches to touch controls; a keyboard, gamepad, or a real mouse used well after the
+## last touch switches back.
 func _observe(event: InputEvent) -> void:
 	if Settings.touch_controls != 0:
 		return
-	if event is InputEventScreenTouch:
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
 		_set_active(true)
-	elif active and (event is InputEventKey and (event as InputEventKey).pressed \
-			or event is InputEventMouseButton and event.device != InputEvent.DEVICE_ID_EMULATION \
-			or event is InputEventMouseMotion and event.device != InputEvent.DEVICE_ID_EMULATION and (event as InputEventMouseMotion).relative.length() > 4.0 \
-			or event is InputEventJoypadButton \
-			or event is InputEventJoypadMotion and absf((event as InputEventJoypadMotion).axis_value) > 0.5):
+	elif not active:
+		return
+	elif event is InputEventKey:
+		if (event as InputEventKey).pressed and not (event as InputEventKey).echo:
+			_set_active(false)
+	elif event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf((event as InputEventJoypadMotion).axis_value) > 0.5):
 		_set_active(false)
+	elif event is InputEventMouseButton or event is InputEventMouseMotion:
+		var real_mouse := event.device != InputEvent.DEVICE_ID_EMULATION and not _touch_recent()
+		var deliberate := event is InputEventMouseButton or (event as InputEventMouseMotion).relative.length() > 4.0
+		if real_mouse and deliberate:
+			_set_active(false)
 
 
 func _on_touch(e: InputEventScreenTouch) -> void:
-	var idx := e.index
 	if e.pressed and not e.canceled:
-		var mode := _mode()
-		var button := _button_at(e.position, mode)
-		if button >= 0:
-			_held[idx] = button
-			_press(button)
-		elif mode == 2 and _stick_index < 0 and _in_stick_zone(e.position):
-			_stick_index = idx
-			_stick_center = _clamped_stick_center(e.position)
-			_stick_knob = e.position
-			_update_stick()
-		else:
-			_touch_pos[idx] = e.position
-			if _look_index < 0:
-				_look_index = idx
-				_look_start_time = Time.get_ticks_msec()
-				_look_moved = 0.0
-				_look_on_prompt = hud != null and hud.prompt_rect().grow(_r * 0.4).has_point(e.position)
-			elif _pinch_index < 0 and mode == 2:
-				_pinch_index = idx
-				_pinch_dist = (_touch_pos[_look_index] as Vector2).distance_to(e.position)
+		_begin(e.index, e.position)
 	else:
-		if _held.has(idx):
-			_release(_held[idx])
-			_held.erase(idx)
-		elif idx == _stick_index:
-			_stick_index = -1
-			_stick_knob = _stick_home
-			_stick_center = _stick_home
-			_update_stick()
-		elif idx == _look_index:
-			var tap := Time.get_ticks_msec() - _look_start_time < 350 and _look_moved < _r * 0.5
-			if tap and _look_on_prompt:
-				_tap("interact")
-			_look_index = _pinch_index
-			_pinch_index = -1
-		elif idx == _pinch_index:
-			_pinch_index = -1
-		_touch_pos.erase(idx)
+		_end(e.index)
 	_surface.queue_redraw()
 
 
+func _begin(idx: int, p: Vector2) -> void:
+	if _down.has(idx):
+		_end(idx)
+	_down[idx] = true
+	var mode := _mode()
+	var button := _button_at(p, mode)
+	if button >= 0:
+		_held[idx] = button
+		_press(button)
+	elif mode == 2 and _stick_index < 0 and _in_stick_zone(p):
+		_stick_index = idx
+		_stick_center = _clamped_stick_center(p)
+		# Grabbing never moves the robot by itself (even where the stick had to be nudged
+		# inward from the screen edge); only dragging from here does.
+		_stick_grab = _stick_center - p
+		_stick_knob = _stick_center
+		_update_stick()
+	else:
+		_touch_pos[idx] = p
+		if _look_index < 0:
+			_look_index = idx
+			_look_start_time = Time.get_ticks_msec()
+			_look_moved = 0.0
+			_look_on_prompt = hud != null and hud.prompt_rect().grow(_r * 0.4).has_point(p)
+		elif _pinch_index < 0 and mode == 2:
+			_pinch_index = idx
+			_pinch_dist = (_touch_pos[_look_index] as Vector2).distance_to(p)
+
+
+func _end(idx: int) -> void:
+	_down.erase(idx)
+	if _held.has(idx):
+		_release(_held[idx])
+		_held.erase(idx)
+	elif idx == _stick_index:
+		_stick_index = -1
+		_stick_knob = _stick_home
+		_stick_center = _stick_home
+		_update_stick()
+	elif idx == _look_index:
+		var tap := Time.get_ticks_msec() - _look_start_time < 350 and _look_moved < _r * 0.5
+		if tap and _look_on_prompt:
+			_tap("interact")
+		_look_index = _pinch_index
+		_pinch_index = -1
+	elif idx == _pinch_index:
+		_pinch_index = -1
+	_touch_pos.erase(idx)
+
+
 func _on_drag(e: InputEventScreenDrag) -> void:
-	if e.index == _stick_index:
-		_stick_knob = e.position
+	var idx := e.index
+	if not _down.has(idx):
+		# A finger we never saw land (it landed while a menu was open, or its start was
+		# lost): pick it up from here.
+		_begin(idx, e.position)
+		_surface.queue_redraw()
+		return
+	if idx == _stick_index:
+		_stick_knob = e.position + _stick_grab
 		_update_stick()
 		_surface.queue_redraw()
 		return
-	if e.index != _look_index and e.index != _pinch_index:
+	if idx != _look_index and idx != _pinch_index:
 		return
-	_touch_pos[e.index] = e.position
+	# Movement from this finger's own last position: the browser's per-event "relative" mixes
+	# fingers up when two of them move at once (stick and look together).
+	var prev: Vector2 = _touch_pos.get(idx, e.position)
+	var delta := e.position - prev
+	_touch_pos[idx] = e.position
 	var rig := _rig()
 	if _pinch_index >= 0 and _touch_pos.has(_look_index) and _touch_pos.has(_pinch_index):
 		var d := (_touch_pos[_look_index] as Vector2).distance_to(_touch_pos[_pinch_index])
 		if rig and _pinch_dist > 1.0 and d > 1.0:
 			rig.touch_zoom(_pinch_dist / d)
 		_pinch_dist = d
-	elif e.index == _look_index:
-		_look_moved += e.relative.length()
+	elif idx == _look_index:
+		_look_moved += delta.length()
 		if rig and _mode() == 2:
-			rig.touch_look(e.relative / _view)
+			rig.touch_look(delta / _view)
 
 
 func _update_stick() -> void:
@@ -296,6 +346,8 @@ func _release_all() -> void:
 	_look_index = -1
 	_pinch_index = -1
 	_touch_pos.clear()
+	_down.clear()
+	_stick_grab = Vector2.ZERO
 	if _surface:
 		_surface.queue_redraw()
 
@@ -325,7 +377,7 @@ func _layout() -> void:
 	var px_per_unit := get_viewport().get_final_transform().get_scale().x
 	var css_per_unit := maxf(px_per_unit, 0.01) / maxf(DisplayServer.screen_get_scale(), 1.0)
 	_r = clampf(BUTTON_CSS_RADIUS / css_per_unit * Settings.touch_size, 36.0, minf(_view.x, _view.y) * 0.09)
-	_margin = _r * 0.55 + 18.0
+	_margin = maxf(_r * 0.55 + 18.0, EDGE_CSS / css_per_unit)
 	_stick_radius = _r * 1.85
 	_stick_home = Vector2(_margin + _stick_radius, _view.y - _margin - _stick_radius)
 	if _stick_index < 0:
@@ -340,10 +392,13 @@ func _layout() -> void:
 		BOOST: {"pos": hop + Vector2(hop_r - _r, -(hop_r + _r + gap)), "r": _r},
 		SCAN: {"pos": hop + Vector2(-1, -1).normalized() * (hop_r + _r + gap) * 1.08, "r": _r},
 	}
+	# Pause and journal: top right, under the energy counter (top centre is for area titles,
+	# and the goal panel top left can be wide).
 	var small := _r * 0.72
-	var top := _margin * 0.6 + small
-	_buttons[PAUSE] = {"pos": Vector2(_view.x * 0.5 + small + gap * 0.5, top), "r": small}
-	_buttons[JOURNAL] = {"pos": Vector2(_view.x * 0.5 - small - gap * 0.5, top), "r": small}
+	var top := 190.0 + small
+	var right := _view.x - maxf(_margin * 0.6, 30.0) - small
+	_buttons[PAUSE] = {"pos": Vector2(right, top), "r": small}
+	_buttons[JOURNAL] = {"pos": Vector2(right - small * 2.0 - gap, top), "r": small}
 	_surface.queue_redraw()
 
 
