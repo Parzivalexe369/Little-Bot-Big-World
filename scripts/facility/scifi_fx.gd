@@ -38,7 +38,8 @@ static func _material(color: Color, additive: bool, energy: float) -> StandardMa
 	m.vertex_color_use_as_albedo = true
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
-	m.proximity_fade_enabled = true
+	# Browsers: no soft depth fade (WebGL cannot copy the depth buffer it needs).
+	m.proximity_fade_enabled = not OS.has_feature("web")
 	m.proximity_fade_distance = 0.6
 	m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_ALPHA
 	m.distance_fade_min_distance = 0.4
@@ -54,7 +55,7 @@ static func _material(color: Color, additive: bool, energy: float) -> StandardMa
 
 static func _emitter(parent: Node, pos: Vector3, amount: int, lifetime: float, mat: Material, pm: ParticleProcessMaterial, size: float) -> GPUParticles3D:
 	var p := GPUParticles3D.new()
-	p.amount = amount
+	p.amount = maxi(amount / 2, 1) if OS.has_feature("web") else amount
 	p.lifetime = lifetime
 	p.process_material = pm
 	var quad := QuadMesh.new()
@@ -101,7 +102,8 @@ static func dust(parent: Node, center: Vector3, size: Vector3, amount := 160, co
 	pm.spread = 180.0
 	pm.initial_velocity_min = 0.02
 	pm.initial_velocity_max = 0.08
-	pm.turbulence_enabled = true
+	# Browsers: no turbulence (its noise shader takes about a minute to compile under WebGL).
+	pm.turbulence_enabled = not OS.has_feature("web")
 	pm.turbulence_noise_strength = 0.4
 	pm.turbulence_noise_scale = 3.0
 	pm.turbulence_noise_speed_random = 0.3
@@ -121,7 +123,7 @@ static func embers(parent: Node, center: Vector3, size: Vector3, color: Color, a
 	pm.initial_velocity_min = rise * 0.5
 	pm.initial_velocity_max = rise
 	pm.gravity = Vector3(0, 0.1, 0)
-	pm.turbulence_enabled = true
+	pm.turbulence_enabled = not OS.has_feature("web")
 	pm.turbulence_noise_strength = 1.2
 	pm.turbulence_noise_scale = 6.0
 	pm.scale_min = 0.5

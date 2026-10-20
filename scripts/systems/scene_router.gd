@@ -36,6 +36,9 @@ func _ready() -> void:
 	_loading.offset_right = -48
 	_loading.offset_bottom = -40
 	_loading.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	# Longer (two-line) messages grow up and to the left, staying inside the screen.
+	_loading.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_loading.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_loading.modulate.a = 0.0
 	add_child(_loading)
 
@@ -91,6 +94,8 @@ func go_to(path: String, fade_time: float = 0.6) -> void:
 	_busy = true
 	await fade_out(fade_time)
 	_loading.text = {WORLD: "Waking up...", FACILITY: "Descending..."}.get(path, "Returning...")
+	if OS.has_feature("web") and path != MAIN_MENU:
+		_loading.text += "\nThe first visit can take a minute or two."
 	_loading.modulate.a = 0.8
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -100,9 +105,31 @@ func go_to(path: String, fade_time: float = 0.6) -> void:
 		push_error("Could not change scene to %s (%s)" % [path, error_string(err)])
 	await get_tree().process_frame
 	await get_tree().process_frame
+	if OS.has_feature("web") and path != MAIN_MENU:
+		await _settle_shaders()
 	_busy = false
 	_loading.modulate.a = 0.0
 	await fade_in(fade_time)
+
+
+## Browsers compile each shader the first time it is drawn, which freezes the page for a while
+## on a first visit. Keep the loading screen up, with the game paused, until frames come
+## smoothly again, so the scene does not start (or fade in) in jerks.
+func _settle_shaders() -> void:
+	get_tree().paused = true
+	var smooth := 0
+	var start := Time.get_ticks_msec()
+	var last := start
+	# Compile stalls last seconds; a merely slow device (a few fps) still counts as smooth.
+	while smooth < 30 and Time.get_ticks_msec() - start < 240000:
+		await get_tree().process_frame
+		var now := Time.get_ticks_msec()
+		smooth = smooth + 1 if now - last < 500 else 0
+		last = now
+	# Leave the game paused if its pause menu opened meanwhile (e.g. the tab lost focus).
+	var menu := get_tree().current_scene.get("pause_menu") as PauseMenu if get_tree().current_scene else null
+	if menu == null or not menu.is_open():
+		get_tree().paused = false
 
 
 func fade_out(duration: float = 0.6) -> void:

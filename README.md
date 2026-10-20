@@ -21,6 +21,62 @@ The main scene is `scenes/ui/main_menu.tscn`. Godot's import cache (`.godot/`) a
 builds (`build/`) are not committed, so the first launch imports every asset, which takes a
 few minutes.
 
+## Browser version (GitHub Pages, Vercel)
+
+```bash
+python tools/build_web.py
+```
+
+This builds the game for browsers into `build/web/` (about 120 MB: `index.pck` 82 MB,
+`index.wasm` 38 MB, no file over GitHub's 100 MB limit). It works on a temporary copy of the
+project, so the desktop game keeps its full-quality assets. The copy gets lighter textures
+(sci-fi scans 1024 px, garden scans 512 px, terrain layers 768 px) and a few fixes for the
+browser renderer (WebGL 2). The script's header lists them all. The build is
+single-threaded, so it needs no special server headers. `build/web/` also gets `.nojekyll`
+(GitHub Pages) and `vercel.json` (Vercel: static site, no build step).
+
+To try it locally, serve the folder over HTTP. Opening `index.html` as a file does not work.
+
+```bash
+python -m http.server 8060 --directory build/web
+```
+
+Then open http://localhost:8060. `python tools/build_web.py --test` also exports test builds
+into `build/web_test/` that start directly in the garden or the facility. They are for
+checking only; never deploy them.
+
+**Deploying.** Publish the *contents* of `build/web/` as the site root. This repository
+keeps them on a `gh-pages` branch. To update it after a new build:
+
+```bash
+git worktree add build/gh-pages gh-pages
+cp -r build/web/. build/gh-pages/
+git -C build/gh-pages add -A
+git -C build/gh-pages commit -m "Update web build"
+git -C build/gh-pages push
+git worktree remove build/gh-pages
+```
+
+Hosting that branch:
+
+- **GitHub Pages:** in the repository's Settings → Pages, choose "Deploy from a branch",
+  then select `gh-pages` / root.
+- **Vercel:** import the GitHub repository, set the production branch to `gh-pages`, and
+  choose the framework preset "Other" with no build command. Deploy through the GitHub
+  integration rather than `vercel deploy`, because the CLI upload limit on the Hobby plan
+  is smaller than this build.
+
+**What to expect in a browser**
+
+- The browser version uses the Low graphics preset at 80% render scale. Volumetric fog,
+  bounce light, SSAO and shadows from the sci-fi lamps are off.
+- On the first visit, the browser compiles the game's shaders while the loading screen is
+  up. On Windows this took about a minute for the garden and two to three minutes for the
+  sci-fi facility on a laptop with integrated graphics.
+- Later visits start quickly, because the browser caches compiled shaders.
+- Measured on that laptop (AMD integrated GPU, Chrome engine): the garden ran at about
+  30 fps and the facility at about 14 fps. A dedicated graphics card should do better.
+
 ## Controls
 
 | Action | Keyboard / Mouse | Gamepad |
@@ -152,6 +208,7 @@ Key ideas:
 | `blender -b --python tools/blender/build_scifi_props.py` | Rebuild `assets/environment/scifi_props.glb` |
 | `tools/facility_perf.sh` | GPU/CPU frame time at six spots in the sci-fi areas (`quality=N` optional) |
 | `godot --headless --path . --export-release "macOS" build/macos/LittleBotBigWorld.zip` | Universal macOS app (Intel + Apple Silicon, ad-hoc signed); see `build/macos/HOW_TO_RUN_ON_MAC.txt` |
+| `python tools/build_web.py [--test]` | Browser build with lighter textures in `build/web/` (see "Browser version" above) |
 | `python tools/gen_facility_levels.py` | Regenerate the facility scenes (checkpoints, fragments, discoveries) |
 | `python tools/audio/generate_scifi_audio.py` | Synthesize the sci-fi sounds (leaves the original audio untouched) |
 | `tools/capture.sh <shots.json>` | Screenshots from scripted viewpoints (`docs/captures/baseline.json` = the before/after views) |

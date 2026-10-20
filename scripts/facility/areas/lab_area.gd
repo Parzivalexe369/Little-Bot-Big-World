@@ -715,10 +715,16 @@ func _open_vent(instant: bool) -> void:
 
 func _build_hidden_lab() -> void:
 	var chamber := ScifiKit.place(self, "sf_chamber", Vector3(22.0, 2.2, -5.0), 0.0)
-	var glass_mat := (ScifiKit.material("sf_glass") as ShaderMaterial).duplicate() as ShaderMaterial
-	glass_mat.set_shader_parameter("crack_amount", 0.8)
-	glass_mat.set_shader_parameter("inner_glow", Color(0.5, 1.0, 0.4))
-	glass_mat.set_shader_parameter("inner_glow_energy", 0.6)
+	var glass_mat := ScifiKit.material("sf_glass").duplicate() as Material
+	if glass_mat is ShaderMaterial:
+		(glass_mat as ShaderMaterial).set_shader_parameter("crack_amount", 0.8)
+		(glass_mat as ShaderMaterial).set_shader_parameter("inner_glow", Color(0.5, 1.0, 0.4))
+		(glass_mat as ShaderMaterial).set_shader_parameter("inner_glow_energy", 0.6)
+	else:
+		# Browser glass (plain transparency): tint it with the seed's green glow instead.
+		(glass_mat as StandardMaterial3D).albedo_color = Color(0.6, 1.0, 0.5, 0.3)
+		(glass_mat as StandardMaterial3D).emission_enabled = true
+		(glass_mat as StandardMaterial3D).emission = Color(0.3, 0.7, 0.25)
 	for mi: MeshInstance3D in [chamber] + chamber.find_children("*", "MeshInstance3D", true, false):
 		for s in mi.mesh.get_surface_count():
 			if mi.mesh.surface_get_material(s) == ScifiKit.material("sf_glass"):

@@ -585,7 +585,12 @@ func _build_atmosphere() -> void:
 		shaft.light_volumetric_fog_energy = 1.8
 		shaft.spot_angle_attenuation = 2.0
 		shaft.distance_fade_enabled = false
-	var haze := FogVolume.new()
+	# Fog volumes need volumetric fog (Forward+); browsers skip the haze.
+	var haze := FogVolume.new() if not OS.has_feature("web") else null
+	if haze == null:
+		ScifiFx.embers(self, Vector3(0, -23.5, -12), Vector3(86, 1, 114), Color(0.55, 1.0, 0.8), 700, 1.4, 4.0)
+		ScifiFx.motes(self, Vector3(0, 5.2, -31), 1.9, 5.5, Color(0.5, 1.0, 0.85), 180, 3.5)
+		return
 	haze.size = Vector3(92, 10, 120)
 	haze.shape = RenderingServer.FOG_VOLUME_SHAPE_BOX
 	var fm := FogMaterial.new()

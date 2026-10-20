@@ -161,6 +161,15 @@ static func material(mat_name: String) -> Material:
 			rb.uv1_world_triplanar = true
 			rb.uv1_scale = Vector3.ONE * 2.0
 			m = rb
+		"sf_glass" when OS.has_feature("web"):
+			# Browsers: plain transparent glass (screen-reading refraction costs a frame copy).
+			var wg := _std(Color(0.75, 0.9, 0.95, 0.22), 0.0, 0.05)
+			wg.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			wg.specular_mode = BaseMaterial3D.SPECULAR_SCHLICK_GGX
+			wg.rim_enabled = true
+			wg.rim = 0.4
+			wg.render_priority = 1
+			m = wg
 		"sf_glass":
 			var g := ShaderMaterial.new()
 			g.shader = GLASS
@@ -568,7 +577,8 @@ static func light(parent: Node, pos: Vector3, color: Color, energy: float, light
 	l.light_energy = energy
 	l.omni_range = light_range
 	l.omni_attenuation = 1.2
-	l.shadow_enabled = shadow
+	# Browsers: no shadows from the many sci-fi lights (each one is a shadow-map pass).
+	l.shadow_enabled = shadow and not OS.has_feature("web")
 	l.light_volumetric_fog_energy = 1.4
 	l.distance_fade_enabled = true
 	l.distance_fade_begin = 45.0
@@ -585,7 +595,7 @@ static func spot(parent: Node, pos: Vector3, target: Vector3, color: Color, ener
 	l.spot_range = light_range
 	l.spot_angle = angle
 	l.spot_angle_attenuation = 0.8
-	l.shadow_enabled = shadow
+	l.shadow_enabled = shadow and not OS.has_feature("web")
 	l.light_volumetric_fog_energy = 2.0
 	parent.add_child(l)
 	l.look_at_from_position(pos, target, Vector3.UP if absf((target - pos).normalized().y) < 0.99 else Vector3.FORWARD)

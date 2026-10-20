@@ -70,6 +70,7 @@ class HoloNote extends Node3D:
 	var size := 0.05
 	var projector := true
 	var label: Label3D
+	const PEAK_ALPHA := 0.92
 
 	func _ready() -> void:
 		if projector:
@@ -79,6 +80,10 @@ class HoloNote extends Node3D:
 		label.width = 1500.0
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		# The shimmer runs on the instance transparency: changing a Label3D's modulate rebuilds
+		# its text mesh, which for a dozen long notes cost ~10 ms of CPU every frame.
+		label.modulate.a = PEAK_ALPHA
+		label.outline_modulate.a = 0.6 * PEAK_ALPHA / 0.82
 		var glow := OmniLight3D.new()
 		glow.light_color = color
 		glow.light_energy = 0.5
@@ -89,7 +94,8 @@ class HoloNote extends Node3D:
 	func _process(_delta: float) -> void:
 		if label:
 			var t := Time.get_ticks_msec() * 0.001
-			label.modulate.a = 0.82 + 0.1 * sin(t * 3.0) - (0.4 if fmod(t * 7.3, 13.0) < 0.15 else 0.0)
+			var a := 0.82 + 0.1 * sin(t * 3.0) - (0.4 if fmod(t * 7.3, 13.0) < 0.15 else 0.0)
+			label.transparency = 1.0 - a / PEAK_ALPHA
 
 
 ## A hazard that charges (telegraph), fires for a while, then rests. Touching it while it is

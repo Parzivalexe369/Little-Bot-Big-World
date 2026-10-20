@@ -23,7 +23,8 @@ var fullscreen := false
 var resolution := Vector2i(1600, 900)
 var vsync := true
 var quality := 1
-var render_scale := 1.0
+# Browsers render the 3D view a little below the canvas resolution by default (fill rate).
+var render_scale := 0.8 if OS.has_feature("web") else 1.0
 
 
 func _ready() -> void:
@@ -96,7 +97,10 @@ func apply_display() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
 	var window := get_window()
-	if fullscreen:
+	# In a browser the page sizes the canvas (and fullscreen needs a click), so leave it alone.
+	if OS.has_feature("web"):
+		pass
+	elif fullscreen:
 		window.mode = Window.MODE_FULLSCREEN
 	else:
 		if window.mode != Window.MODE_WINDOWED:
@@ -109,9 +113,12 @@ func apply_display() -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED)
 	var vp := get_viewport()
 	vp.scaling_3d_scale = render_scale
-	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if render_scale < 0.99 else Viewport.SCALING_3D_MODE_BILINEAR
+	# The browser (Compatibility) renderer only scales bilinearly.
+	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if render_scale < 0.99 and not OS.has_feature("web") else Viewport.SCALING_3D_MODE_BILINEAR
 	vp.msaa_3d = Viewport.MSAA_DISABLED if quality == 0 else (Viewport.MSAA_2X if quality == 1 else Viewport.MSAA_4X)
-	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if quality == 0 else Viewport.SCREEN_SPACE_AA_DISABLED
+	# FXAA is a Forward+/Mobile feature; the browser renderer warns if it is touched at all.
+	if not OS.has_feature("web"):
+		vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if quality == 0 else Viewport.SCREEN_SPACE_AA_DISABLED
 
 
 ## Quality-dependent tuning read by the world (shadows, vegetation density, post effects).
@@ -155,6 +162,8 @@ func _set_bus(bus_name: String, linear: float) -> void:
 func _default_quality() -> int:
 	if DisplayServer.get_name() == "headless":
 		return 1
+	if OS.has_feature("web"):
+		return 0
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
 	if adapter.contains("intel") or adapter.contains("radeon(tm) graphics"):
 		return 0
