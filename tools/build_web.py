@@ -351,12 +351,21 @@ def export_test_builds(a):
         shutil.rmtree(test_root)
     proj = os.path.join(a.work, "project.godot")
     original = open(proj, encoding="utf-8").read()
+    # The browser benchmark (tools/ is not exported, so it is copied next to the game).
+    bench_dir = os.path.join(a.work, "bench")
+    os.makedirs(bench_dir, exist_ok=True)
+    shutil.copy(os.path.join(PROJECT, "tools", "web_bench.gd"), bench_dir)
+    with open(os.path.join(bench_dir, "web_bench.tscn"), "w", encoding="utf-8") as f:
+        f.write('[gd_scene format=3]\n\n[ext_resource type="Script" path="res://bench/web_bench.gd" id="1"]\n\n'
+                '[node name="WebBench" type="Node"]\nscript = ExtResource("1")\n')
+    scenes = {"world": "res://scenes/world/world.tscn", "facility": "res://scenes/facility/facility.tscn",
+              "bench": "res://bench/web_bench.tscn"}
     try:
-        for scene, mode in (("world", "debug"), ("facility", "debug"), ("facility", "release")):
-            name = scene if mode == "debug" else scene + "_release"
+        for scene, mode in (("world", "debug"), ("facility", "debug"), ("facility", "release"), ("bench", "release")):
+            name = scene if mode == "debug" or scene == "bench" else scene + "_release"
             out = os.path.join(test_root, name)
             os.makedirs(out)
-            open(proj, "w", encoding="utf-8").write(re.sub(r'^run/main_scene=.*$', 'run/main_scene="res://scenes/%s/%s.tscn"' % (scene, scene), original, flags=re.M))
+            open(proj, "w", encoding="utf-8").write(re.sub(r'^run/main_scene=.*$', 'run/main_scene="%s"' % scenes[scene], original, flags=re.M))
             code = run(a.godot, ["--headless", "--path", a.work, "--export-" + mode, "Web", os.path.join(out, "index.html")],
                        os.path.join(a.work, "export_test_%s.log" % name))
             log("test build %s: %s" % (name, "ok" if code == 0 else "FAILED"))

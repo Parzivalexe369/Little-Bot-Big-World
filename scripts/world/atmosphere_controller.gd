@@ -135,9 +135,9 @@ func setup(world_environment: WorldEnvironment, sun_light: DirectionalLight3D) -
 	sun.directional_shadow_split_3 = 0.4
 	sun.directional_shadow_fade_start = 0.85
 	if OS.has_feature("web"):
-		# Browsers: two cascades (each one redraws every shadow caster), the near one ~9 m.
-		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
-		sun.directional_shadow_split_1 = 0.2
+		# Browsers: one shadow map over the nearest 30 m (every cascade redraws every shadow
+		# caster, and casters cost a draw call each).
+		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 	_current = MOODS[&"meadow"].duplicate()
 	apply_quality()
 	Settings.changed.connect(apply_quality)
@@ -145,7 +145,7 @@ func setup(world_environment: WorldEnvironment, sun_light: DirectionalLight3D) -
 
 func apply_quality() -> void:
 	var q := Settings.quality_params()
-	sun.directional_shadow_max_distance = minf(q["shadow_distance"], 45.0) if OS.has_feature("web") else q["shadow_distance"]
+	sun.directional_shadow_max_distance = minf(q["shadow_distance"], WebDrawDistance.SHADOW_RANGE) if OS.has_feature("web") else q["shadow_distance"]
 	environment.ssao_enabled = q["ssao"]
 	environment.glow_enabled = q["glow"]
 	environment.ssr_enabled = q["ssr"]

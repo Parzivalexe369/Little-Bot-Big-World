@@ -53,6 +53,9 @@ func _ready() -> void:
 	_build_ambient_fx()
 	if OS.has_feature("web"):
 		WebDrawDistance.apply.call_deferred($Levels)
+		WebDrawDistance.no_local_shadows.call_deferred($Levels)
+		if Settings.is_touch_web():
+			WebDrawDistance.only_shadows_from.call_deferred(self, player)
 	Events.restoration_requested.connect(director.play_restoration)
 	Events.look_at_requested.connect(director.look_at)
 	GameState.area_entered.connect(_on_area_entered)

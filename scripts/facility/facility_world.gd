@@ -44,6 +44,10 @@ func _ready() -> void:
 		if child is FacilityArea:
 			(child as FacilityArea).facility = self
 			areas.append(child)
+			if OS.has_feature("web"):
+				(child as FacilityArea).merge_blocks_for_web()
+	if OS.has_feature("web"):
+		WebDrawDistance.no_local_shadows(levels)
 	_setup_environment()
 	camera_rig.set_target(player)
 	player.camera_rig = camera_rig
@@ -278,6 +282,10 @@ func _setup_environment() -> void:
 	sun.shadow_enabled = true
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 	sun.directional_shadow_max_distance = 70.0
+	if OS.has_feature("web"):
+		# Browsers: one shadow map (each cascade redraws every caster).
+		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
+		sun.directional_shadow_max_distance = WebDrawDistance.SHADOW_RANGE
 	sun.directional_shadow_blend_splits = true
 	sun.shadow_blur = 1.5
 	sun.light_angular_distance = 0.6

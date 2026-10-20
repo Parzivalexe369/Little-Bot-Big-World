@@ -65,14 +65,18 @@ func load_settings() -> void:
 		resolution = res
 	vsync = bool(cfg.get_value("video", "vsync", vsync))
 	quality = clampi(int(cfg.get_value("video", "quality", quality)), 0, 2)
-	render_scale = clampf(cfg.get_value("video", "render_scale", render_scale), 0.5, 1.0)
+	render_scale = clampf(cfg.get_value("video", "render_scale", render_scale), 0.4, 1.0)
 
 
 ## Default 3D resolution in a browser: about 1.4 million pixels (high-density tablet screens
-## have three times that), at most 80%; the 2D interface stays at full sharpness.
+## have three times that), at most 80%; the 2D interface stays at full sharpness. Tablets and
+## phones get about 1 million: their GPUs share power and heat with everything else, and a
+## Retina iPad is 4-6 million pixels.
 func _web_render_scale() -> float:
 	var px := DisplayServer.window_get_size()
 	var pixels := maxf(float(px.x * px.y), 1.0)
+	if DisplayServer.is_touchscreen_available():
+		return snappedf(clampf(sqrt(1000000.0 / pixels), 0.4, 0.75), 0.05)
 	return snappedf(clampf(sqrt(1400000.0 / pixels), 0.5, 0.8), 0.05)
 
 
@@ -155,12 +159,18 @@ func apply_display() -> void:
 		vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if quality == 0 else Viewport.SCREEN_SPACE_AA_DISABLED
 
 
+## A browser on a touch screen (iPad, tablets, phones) gets the lightest setup: lower 3D
+## resolution, thinner grass, and only the robot casts a sun shadow.
+func is_touch_web() -> bool:
+	return OS.has_feature("web") and DisplayServer.is_touchscreen_available()
+
+
 ## Quality-dependent tuning read by the world (shadows, vegetation density, post effects).
 func quality_params() -> Dictionary:
 	match quality:
 		0:
 			return {"shadow_distance": 60.0, "shadow_size": 2048, "ssao": false, "glow": true,
-				"grass_density": 0.45, "detail_range": 70.0, "fog_volumetric": false, "ssr": false,
+				"grass_density": 0.3 if is_touch_web() else 0.45, "detail_range": 70.0, "fog_volumetric": false, "ssr": false,
 				"ssil": false, "ssil_quality": 0, "dof": false, "shadow_filter": 1}
 		2:
 			return {"shadow_distance": 140.0, "shadow_size": 4096, "ssao": true, "glow": true,

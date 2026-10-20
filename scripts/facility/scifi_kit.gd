@@ -470,6 +470,7 @@ static func block(parent: Node, size: Vector3, center: Vector3, style_name: Stri
 	var mi := MeshInstance3D.new()
 	mi.mesh = bevel_box(size, STYLE_BEVEL.get(style_name, 0.03))
 	mi.material_override = style(style_name)
+	mi.set_meta(&"block", true)
 	parent.add_child(mi)
 	mi.position = center
 	mi.rotation_degrees.y = yaw_deg

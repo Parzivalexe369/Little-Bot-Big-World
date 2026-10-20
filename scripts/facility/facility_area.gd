@@ -26,6 +26,21 @@ func on_respawn() -> void:
 	pass
 
 
+## Browsers: merges the area's walls and floors into a few meshes (see
+## WebDrawDistance.merge_blocks). Called by the FacilityWorld once the area is built.
+func merge_blocks_for_web() -> void:
+	_blocks_merged(WebDrawDistance.merge_blocks(self, _block_group))
+
+
+## Which blocks may share one merged mesh (same number = same mesh).
+func _block_group(_block: MeshInstance3D) -> int:
+	return 0
+
+
+func _blocks_merged(_merged: Dictionary) -> void:
+	pass
+
+
 ## Helper: is a step of a multi-part goal done? Steps are members of a GameState set.
 func step_done(set_name: StringName, step: StringName) -> bool:
 	return GameState.set_has(set_name, step)

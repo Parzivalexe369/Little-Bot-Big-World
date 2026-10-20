@@ -33,6 +33,7 @@ var _terminals: Array[Dictionary] = []
 var _sequence: Array[String] = []
 ## Wall blocks; their light strips follow the power of the room they are in.
 var _arch: Array[MeshInstance3D] = []
+var _merged_walls: Array[MeshInstance3D] = []
 ## One entry per ceiling light: {stage, red (emergency), main, lamp}.
 var _light_spots: Array[Dictionary] = []
 var _screens: Array[Node3D] = []
@@ -809,6 +810,9 @@ func _build_blueprint_hologram(at: Vector3) -> void:
 	for mi: MeshInstance3D in robot.find_children("*", "MeshInstance3D", true, false):
 		mi.material_override = holo
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if OS.has_feature("web"):
+		# 111 parts, one material: one draw call instead of 111.
+		WebDrawDistance.merge_static(robot)
 	var spin := create_tween().set_loops()
 	spin.tween_property(robot, "rotation:y", TAU, 12.0).from(0.0)
 
@@ -866,6 +870,7 @@ func _set_power_stage(stage: int, animate: bool) -> void:
 		ScifiKit.set_power(screen, 1.0 if _power_stage >= 3 else 0.25)
 	for block in _arch:
 		ScifiKit.set_power(block, 1.0 if _room_stage(block.position) <= _power_stage else 0.08)
+	_power_merged_walls()
 	if _power_stage >= 1:
 		_door_a.open(not animate)
 	if _power_stage >= 2:
@@ -1051,6 +1056,25 @@ func _build_probes() -> void:
 
 
 ## Which power step lights a room: 1 arrival/breaker, 2 optics + hidden lab, 3 control.
+## Browsers: walls are merged per room, so each room's walls still power up on their own.
+func _block_group(block: MeshInstance3D) -> int:
+	return _room_stage(block.position) if _arch.has(block) else 0
+
+
+func _blocks_merged(merged: Dictionary) -> void:
+	for key: Array in merged:
+		if int(key[1]) > 0:
+			var mi: MeshInstance3D = merged[key]
+			mi.set_meta(&"room_stage", int(key[1]))
+			_merged_walls.append(mi)
+	_power_merged_walls()
+
+
+func _power_merged_walls() -> void:
+	for mi in _merged_walls:
+		ScifiKit.set_power(mi, 1.0 if int(mi.get_meta(&"room_stage")) <= _power_stage else 0.08)
+
+
 func _room_stage(p: Vector3) -> int:
 	if p.z > 8.0:
 		return 1

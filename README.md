@@ -52,8 +52,11 @@ python -m http.server 8060 --directory build/web
 ```
 
 Then open http://localhost:8060. `python tools/build_web.py --test` also exports test builds
-into `build/web_test/` that start directly in the garden or the facility. They are for
-checking only; never deploy them.
+into `build/web_test/` that start directly in the garden or the facility, plus a browser
+benchmark (`build/web_test/bench/index.html?scene=world` or `?scene=facility`, from
+`tools/web_bench.gd`). The benchmark visits fixed spots and prints frame times and draw calls
+to the browser console; add `&exp=shadow,GrassField` to also measure with those switched off.
+These builds are for checking only; never deploy them.
 
 **Deploying.** Publish the *contents* of `build/web/` as the site root. This repository
 keeps them on a `gh-pages` branch. To update it after a new build:
@@ -79,20 +82,24 @@ Hosting that branch:
 **What to expect in a browser**
 
 - The browser version uses the Low graphics preset. Volumetric fog, bounce light, SSAO and
-  shadows from the sci-fi lamps are off.
-- The 3D view renders at about 1.4 million pixels by default: 80% on a 1080p screen, about
-  60% on an iPad's high-density screen. Menus and text stay sharp, and Settings → Graphics
-  → Render scale changes it.
+  shadows from lamps and glowing devices are off; only the sun casts shadows.
+- The 3D view renders at about 1.4 million pixels by default (80% on a 1080p screen). On
+  touch screens (iPad, tablets, phones) it is about 1 million pixels (around 40-50% on an
+  iPad's high-density screen), the grass is a little thinner, and only the robot casts a sun
+  shadow. Menus and text stay sharp, and Settings → Graphics → Render scale changes it.
 - "Quit" is hidden in browsers, because a web page cannot close its own tab.
 - Browsers are limited by draw calls (each drawn object goes through JavaScript and WebGL),
   so the browser version draws less at a time:
   - level objects stop drawing beyond a distance that grows with their size
     (`scripts/systems/web_draw_distance.gd`);
-  - the sleeping robots are merged into one mesh per material;
-  - the sun uses two shadow cascades, and tiny parts cast no shadows;
+  - the sleeping robots are merged into one mesh per material, and so are the facility's
+    walls and floors (per room in the lab, which powers its rooms on one by one);
+  - the sun uses one shadow map over the nearest 30 m, tiny parts cast no shadows, and
+    lamps cast none (an omni lamp's shadow redraws everything near it six times, even off
+    screen: three of them cost the garden 170-350 draw calls a frame);
   - the facility draws only the area you are in;
   - there is no depth pre-pass.
-  This took the garden from about 2,500 draw calls a frame to 600–1,100.
+  This took the garden from about 2,500 draw calls a frame to 340–560.
 - While the loading screen is up, the browser version draws the whole level and the common
   effects once (`scripts/systems/shader_warmup.gd`). The browser then compiles their shaders
   during loading, not the first time each thing appears in play. In a cold-compile test
@@ -235,6 +242,7 @@ Key ideas:
 | `tools/playtest.sh` | Automated end-to-end playthrough of the garden (windowed), screenshots in `docs/captures/` |
 | `tools/facility_playtest.sh` | Automated playthrough of the three sci-fi areas (every puzzle, hazard, save, travel) |
 | `blender -b --python tools/blender/build_scifi_props.py` | Rebuild `assets/environment/scifi_props.glb` |
+| `tools/web_bench.tscn` | Browser benchmark (exported by `build_web.py --test` as `build/web_test/bench`) |
 | `tools/facility_perf.sh` | GPU/CPU frame time at six spots in the sci-fi areas (`quality=N` optional) |
 | `godot --headless --path . --export-release "macOS" build/macos/LittleBotBigWorld.zip` | Universal macOS app (Intel + Apple Silicon, ad-hoc signed); see `build/macos/HOW_TO_RUN_ON_MAC.txt` |
 | `python tools/build_web.py [--test]` | Browser build with lighter textures in `build/web/` (see "Browser version" above) |

@@ -10,6 +10,8 @@ const MIN_RANGE := 45.0
 const MAX_RANGE := 160.0
 const FRAGMENT_RANGE := 120.0
 const TINY_PART := 0.5
+## Sun shadow distance in browsers (one orthographic shadow map).
+const SHADOW_RANGE := 30.0
 
 
 static func apply(levels: Node, min_range := MIN_RANGE) -> void:
@@ -70,7 +72,7 @@ static func merge_static(root: Node3D) -> void:
 		for s in mi.mesh.get_surface_count():
 			var mat := mi.get_active_material(s)
 			# Surfaces merge only with the same material and vertex attributes.
-			var attributes: int = mi.mesh.surface_get_format(s) & (Mesh.ARRAY_FORMAT_NORMAL | Mesh.ARRAY_FORMAT_TANGENT | Mesh.ARRAY_FORMAT_TEX_UV | Mesh.ARRAY_FORMAT_TEX_UV2 | Mesh.ARRAY_FORMAT_COLOR)
+			var attributes: int = mi.mesh.surface_get_format(s) & (Mesh.ARRAY_FORMAT_NORMAL | Mesh.ARRAY_FORMAT_TANGENT | Mesh.ARRAY_FORMAT_TEX_UV | Mesh.ARRAY_FORMAT_TEX_UV2 | Mesh.ARRAY_FORMAT_COLOR | Mesh.ARRAY_FORMAT_BONES | Mesh.ARRAY_FORMAT_WEIGHTS)
 			var key := [mat, attributes]
 			var st: SurfaceTool = tools.get(key)
 			if st == null:
@@ -88,6 +90,60 @@ static func merge_static(root: Node3D) -> void:
 	root.add_child(out)
 	for mi in parts:
 		mi.queue_free()
+
+
+## Browsers: the facility's walls, floors and trims (ScifiKit blocks placed directly in an
+## area) become one mesh per material and `group`, instead of one draw call per block; in the
+## lab's arrival hall that is several hundred. Their panel shader maps in world space, so the
+## look is unchanged. The originals are only hidden, so their collision stays. `group_of`
+## (block -> int) keeps blocks apart that need their own shader settings later (the lab
+## powers rooms on one by one). Returns {[material, group]: merged MeshInstance3D}.
+static func merge_blocks(area: Node3D, group_of: Callable) -> Dictionary:
+	var tools := {}
+	var blocks: Array[MeshInstance3D] = []
+	for child in area.get_children():
+		var mi := child as MeshInstance3D
+		# Named blocks are kept apart: scripts look them up.
+		if mi == null or not mi.has_meta(&"block") or not mi.visible or not String(mi.name).begins_with("@"):
+			continue
+		var key := [mi.material_override, int(group_of.call(mi))]
+		var st: SurfaceTool = tools.get(key)
+		if st == null:
+			st = SurfaceTool.new()
+			st.begin(Mesh.PRIMITIVE_TRIANGLES)
+			tools[key] = st
+		for s in mi.mesh.get_surface_count():
+			st.append_from(mi.mesh, s, mi.transform)
+		blocks.append(mi)
+	var merged := {}
+	for key: Array in tools:
+		var out := MeshInstance3D.new()
+		out.name = "MergedBlocks"
+		out.mesh = (tools[key] as SurfaceTool).commit()
+		out.material_override = key[0]
+		area.add_child(out)
+		merged[key] = out
+	for mi in blocks:
+		mi.visible = false
+	return merged
+
+
+## Browsers: lamps and glowing devices (omni and spot lights) cast no shadows. An omni
+## light's shadow redraws every caster near it six times, one per cube face, even while the
+## lamp is off screen: in the garden the three such lights cost ~170-350 draw calls a frame.
+static func no_local_shadows(root: Node) -> void:
+	for node in root.find_children("*", "Light3D", true, false):
+		if not node is DirectionalLight3D:
+			(node as Light3D).shadow_enabled = false
+
+
+## Touch-screen browsers: only `keep` (the robot) casts a sun shadow. The shadow map then
+## redraws a few dozen robot parts instead of every nearby tree, rock and building (100-200
+## draw calls in the garden), and the robot still sits on the ground.
+static func only_shadows_from(root: Node, keep: Node) -> void:
+	for node in root.find_children("*", "GeometryInstance3D", true, false):
+		if not keep.is_ancestor_of(node):
+			(node as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 ## Browsers: parts smaller than `max_size` metres cast no shadows (bolts and trims inside a

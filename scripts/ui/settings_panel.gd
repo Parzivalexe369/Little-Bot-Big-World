@@ -178,7 +178,7 @@ func _build_graphics() -> void:
 		Settings.resolution = _res_list[i]
 		Settings.apply_display())
 	r_row.add_child(_resolution)
-	_slider(page, "Render scale", Settings.render_scale, 0.5, 1.0, 0.05, func(v: float) -> void:
+	_slider(page, "Render scale", Settings.render_scale, 0.4 if OS.has_feature("web") else 0.5, 1.0, 0.05, func(v: float) -> void:
 		Settings.render_scale = v
 		Settings.apply_display())
 	_toggle(page, "V-Sync", Settings.vsync, func(v: bool) -> void:
