@@ -299,7 +299,32 @@ def patch_page(out):
     size = os.path.getsize(os.path.join(out, MOBILE_PACK))
     s = s.replace(marker, PAGE_PACK_CHOICE % (MOBILE_PACK, MOBILE_PACK, size) + marker, 1)
     s = s.replace("</head>", PAGE_HEAD + "\t</head>", 1)
+    s = re.sub(r'<link id="-gd-engine-icon"[^>]*>\s*<link rel="apple-touch-icon"[^>]*>',
+            lambda m: write_icons(out), s, count=1)
     open(p, "w", encoding="utf-8").write(s)
+
+
+def write_icons(out):
+    """Favicon and home-screen icons from the project icon, only scaled. Safari (iPad above
+    all) keeps a favicon by its URL for a long time, so the file names carry a hash of the
+    logo: a new logo gets new URLs and shows up at once. favicon.ico and apple-touch-icon.png
+    at the site root are where Safari looks when it ignores the page's links."""
+    import hashlib
+    src = os.path.join(PROJECT, "icon.png")
+    tag = hashlib.sha1(open(src, "rb").read()).hexdigest()[:8]
+    logo = Image.open(src).convert("RGBA")
+    links = []
+    for size in (32, 192, 512):
+        name = "icon-%s-%d.png" % (tag, size)
+        logo.resize((size, size), Image.LANCZOS).save(os.path.join(out, name))
+        links.append('<link%s rel="icon" type="image/png" sizes="%dx%d" href="%s">'
+                % (' id="-gd-engine-icon"' if size == 32 else "", size, size, name))
+    touch = logo.resize((180, 180), Image.LANCZOS)
+    touch.save(os.path.join(out, "apple-touch-icon-%s.png" % tag))
+    touch.save(os.path.join(out, "apple-touch-icon.png"))
+    links.append('<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-%s.png">' % tag)
+    logo.save(os.path.join(out, "favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
+    return "\n\t\t".join(links)
 
 
 VERCEL_JSON = """{
