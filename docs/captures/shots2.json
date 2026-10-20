@@ -1,0 +1,10 @@
+[
+ {"name": "m01_start", "player": [0, 57], "yaw": 0, "cam_pitch": -12, "wait": 90},
+ {"name": "m02_path", "player": [3, 30], "yaw": 20, "cam_pitch": -10, "wait": 40},
+ {"name": "m03_can", "player": [30, 30], "yaw": -90, "cam_yaw": -90, "cam_pitch": -8, "distance": 5, "wait": 40},
+ {"name": "m04_gate", "player": [2, -40], "yaw": 160, "cam_yaw": 160, "cam_pitch": -10, "distance": 5, "wait": 40},
+ {"name": "f01_forest", "player": [-20, -82], "yaw": 150, "cam_yaw": 150, "cam_pitch": -10, "wait": 40},
+ {"name": "f02_pool", "player": [-16, -112], "yaw": -110, "cam_yaw": -110, "cam_pitch": -12, "distance": 5, "wait": 40},
+ {"name": "s01_plaza", "player": [27, -252], "yaw": 180, "cam_yaw": 180, "cam_pitch": -14, "distance": 6, "wait": 40},
+ {"name": "g01_garden", "player": [12, -330], "yaw": 160, "cam_yaw": 160, "cam_pitch": -12, "distance": 5, "wait": 40}
+]

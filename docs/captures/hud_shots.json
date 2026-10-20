@@ -1,0 +1,77 @@
+[
+ {
+  "name": "h01_prompt",
+  "player": [
+   0,
+   59.2
+  ],
+  "yaw": 180,
+  "cam_yaw": 200,
+  "cam_pitch": -12,
+  "distance": 3.6,
+  "wait": 90,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "hud": true,
+  "input": true,
+  "fragments": 4,
+  "flags": {
+   "robot_awake": true
+  }
+ },
+ {
+  "name": "h02_feedback",
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 15,
+  "cam_pitch": -14,
+  "distance": 3.8,
+  "wait": 40,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "hud": true,
+  "input": true,
+  "toast": [
+   "Energy fragment collected",
+   "energy"
+  ],
+  "discovery": "watering_can",
+  "flags": {
+   "robot_awake": true
+  }
+ },
+ {
+  "name": "h03_banner",
+  "player": [
+   -28,
+   -96
+  ],
+  "yaw": 150,
+  "cam_yaw": 150,
+  "cam_pitch": -12,
+  "distance": 4.5,
+  "wait": 70,
+  "restore": [
+   1,
+   1,
+   0,
+   0
+  ],
+  "hud": true,
+  "input": true,
+  "banner": "forest",
+  "flags": {
+   "robot_awake": true
+  }
+ }
+]

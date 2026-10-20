@@ -1,0 +1,11 @@
+[
+ {"name": "v01_meadow_path", "player": [3, 30], "yaw": 15, "cam_pitch": -16, "distance": 4.2, "wait": 120, "restore": [1,0,0,0]},
+ {"name": "v02_meadow_rocks", "player": [20, 8], "yaw": 120, "cam_yaw": 120, "cam_pitch": -12, "distance": 5.0, "wait": 50, "restore": [1,0,0,0]},
+ {"name": "v03_meadow_vista", "free_cam": [-20, 14, 58], "look": [5, 2, 0], "wait": 50, "restore": [1,0,0,0]},
+ {"name": "v04_forest_path", "player": [-28, -96], "yaw": 150, "cam_yaw": 150, "cam_pitch": -12, "distance": 4.5, "wait": 50, "restore": [1,1,0,0]},
+ {"name": "v05_forest_pool", "player": [-12, -112], "yaw": -100, "cam_pitch": -14, "distance": 4.5, "wait": 50, "restore": [1,1,0,0]},
+ {"name": "v06_shrine_plaza", "free_cam": [12, 13, -252], "look": [30, 7, -270], "wait": 50, "restore": [1,1,1,0]},
+ {"name": "v07_shrine_ruins", "player": [18, -262], "yaw": 220, "cam_yaw": 220, "cam_pitch": -12, "distance": 4.5, "wait": 50, "restore": [1,1,1,0]},
+ {"name": "v08_garden", "player": [2, -350], "yaw": 170, "cam_pitch": -14, "distance": 5, "wait": 50, "restore": [1,1,1,1], "awake": 1},
+ {"name": "v09_garden_heart", "free_cam": [10, 6, -390], "look": [-6, 2, -410], "wait": 50, "restore": [1,1,1,1], "awake": 1}
+]

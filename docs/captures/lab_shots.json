@@ -1,0 +1,7 @@
+[
+ {"name": "l01_arrival", "at": [0, 0.1, 25], "yaw": 0, "cam_yaw": 160, "cam_pitch": -10, "distance": 5.5, "wait": 120},
+ {"name": "l02_breaker", "at": [-13, 0.1, 24], "yaw": 90, "cam_yaw": 60, "cam_pitch": -12, "distance": 5.0, "wait": 40},
+ {"name": "l03_optics", "free_cam": [10, 5.2, 7], "look": [-4, 0.5, -8], "wait": 40},
+ {"name": "l04_hidden", "free_cam": [19, 4.6, 3], "look": [23, 2.6, -5], "wait": 40},
+ {"name": "l05_control", "free_cam": [-6, 4.5, -25], "look": [-6, 1.5, -37], "wait": 40}
+]

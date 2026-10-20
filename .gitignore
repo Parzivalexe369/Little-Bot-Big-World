@@ -1,0 +1,15 @@
+# Godot's import cache: rebuilt automatically the first time the project is opened.
+.godot/
+
+# Exported builds (re-create them from the export presets; too large for git).
+/build/
+
+# The Godot editor itself (download Godot 4.7.2 into tools/, see README).
+/tools/Godot_v4.7.2-stable_win64.exe
+/tools/Godot_v4.7.2-stable_win64_console.exe
+
+# Blender autosaves and OS clutter.
+*.blend1
+*.tmp
+Thumbs.db
+.DS_Store

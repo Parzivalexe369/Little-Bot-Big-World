@@ -1,0 +1,5 @@
+[
+ {"name": "m01_boost", "player": [4, 44], "yaw": 180, "cam_yaw": 160, "cam_pitch": -12, "distance": 3.8, "restore": [1,0,0,0], "hud": true, "input": true, "flags": {"robot_awake": true}, "press": ["move_back", "boost"], "keep_pressed": true, "hold": 1, "wait": 45},
+ {"name": "m02_land", "player": [3, 30], "yaw": 15, "cam_pitch": -10, "distance": 3.8, "restore": [1,0,0,0], "hud": true, "input": true, "flags": {"robot_awake": true}, "press": ["hop"], "hold": 20, "wait": 30},
+ {"name": "m03_forest_move", "player": [-28, -96], "yaw": 150, "cam_yaw": 150, "cam_pitch": -12, "distance": 4.2, "restore": [1,1,0,0], "hud": true, "input": true, "flags": {"robot_awake": true}, "press": ["move_forward"], "keep_pressed": true, "hold": 1, "wait": 40}
+]

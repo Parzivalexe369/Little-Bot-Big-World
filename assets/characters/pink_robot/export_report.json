@@ -1,0 +1,185 @@
+{
+ "pink_robot_bounds": [
+  [
+   -0.45,
+   -0.299,
+   0.019
+  ],
+  [
+   0.467,
+   0.298,
+   0.701
+  ]
+ ],
+ "the_ball_bounds": [
+  [
+   -0.525,
+   -0.317,
+   -0.003
+  ],
+  [
+   0.525,
+   0.201,
+   0.7
+  ]
+ ],
+ "the_ball_v2_bounds": [
+  [
+   -0.381,
+   -0.321,
+   -0.0
+  ],
+  [
+   0.381,
+   0.322,
+   0.7
+  ]
+ ],
+ "old_robot_materials": {
+  "RIG_TheBall": [
+   "BALL_Aluminum_Brushed",
+   "BALL_Dark_Metal",
+   "BALL_Gold",
+   "BALL_Interior_Charcoal",
+   "BALL_Interior_Panel",
+   "BALL_LED_Green",
+   "BALL_Orange_Accent",
+   "BALL_Rubber_Dark",
+   "BALL_Seam_Dark",
+   "BALL_Sensor_Lime",
+   "BALL_Shell_Yellow",
+   "BALL_Visor_Glass"
+  ],
+  "RIG_TheBall_V2": [
+   "TB2_Armor_Lower",
+   "TB2_BlackGlass",
+   "TB2_Chrome",
+   "TB2_DisplayCore",
+   "TB2_EyeOrange",
+   "TB2_Gunmetal",
+   "TB2_Housing_LightGray",
+   "TB2_HubMetal",
+   "TB2_InnerModule",
+   "TB2_Orange",
+   "TB2_OrangeLight",
+   "TB2_RimTrim",
+   "TB2_Rubber",
+   "TB2_Shell_BlueGray",
+   "TB2_SidePanel_Gray",
+   "TB2_SmokyGray",
+   "TB2_Vent_BlueGray"
+  ]
+ },
+ "color_ramps": {
+  "BALL_Shell_Yellow": [
+   [
+    0.0,
+    [
+     1.0,
+     0.42,
+     0.05,
+     1.0
+    ]
+   ],
+   [
+    0.3,
+    [
+     1.0,
+     0.6,
+     0.05,
+     1.0
+    ]
+   ],
+   [
+    0.6,
+    [
+     1.0,
+     0.74,
+     0.07,
+     1.0
+    ]
+   ],
+   [
+    1.0,
+    [
+     1.0,
+     0.87,
+     0.24,
+     1.0
+    ]
+   ]
+  ],
+  "M_CandyPink": [
+   [
+    0.0,
+    [
+     1.0,
+     0.035,
+     0.34,
+     1.0
+    ]
+   ],
+   [
+    1.0,
+    [
+     0.55,
+     0.004,
+     0.24,
+     1.0
+    ]
+   ]
+  ]
+ },
+ "black_glass": {
+  "Material Output": {
+   "Displacement": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Thickness": 0.0
+  },
+  "Fresnel": {
+   "IOR": 1.52,
+   "Normal": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "Transparent BSDF": {
+   "Color": [
+    0.2,
+    0.205,
+    0.22,
+    1.0
+   ],
+   "Weight": 0.0
+  },
+  "Glossy BSDF": {
+   "Color": [
+    0.8,
+    0.8,
+    0.8,
+    1.0
+   ],
+   "Roughness": 0.015,
+   "Anisotropy": 0.0,
+   "Rotation": 0.0,
+   "Normal": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Tangent": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "Weight": 0.0
+  },
+  "Mix Shader": {
+   "Factor": 0.5
+  }
+ }
+}

@@ -1,0 +1,71 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/world.gd" id="1_world"]
+[ext_resource type="Script" path="res://scripts/world/world_terrain.gd" id="2_terrain"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="3_player"]
+[ext_resource type="Script" path="res://scripts/player/camera_rig.gd" id="4_camera"]
+[ext_resource type="Script" path="res://scripts/world/atmosphere_controller.gd" id="5_atmo"]
+[ext_resource type="Script" path="res://scripts/world/water_bodies.gd" id="6_water"]
+[ext_resource type="Script" path="res://scripts/world/grass_field.gd" id="7_grass"]
+[ext_resource type="PackedScene" path="res://scenes/levels/meadow.tscn" id="8_meadow"]
+[ext_resource type="PackedScene" path="res://scenes/levels/mushroom_forest.tscn" id="9_forest"]
+[ext_resource type="PackedScene" path="res://scenes/levels/forgotten_shrine.tscn" id="10_shrine"]
+[ext_resource type="PackedScene" path="res://scenes/levels/crystal_garden.tscn" id="11_garden"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="12_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="13_pause"]
+[ext_resource type="PackedScene" path="res://scenes/ui/completion_screen.tscn" id="14_complete"]
+[ext_resource type="Script" path="res://scripts/world/world_director.gd" id="15_director"]
+[ext_resource type="Script" path="res://scripts/world/world_boundary.gd" id="16_boundary"]
+[ext_resource type="Script" path="res://scripts/facility/gateway_lift.gd" id="17_lift"]
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+light_energy = 1.3
+shadow_enabled = true
+
+[node name="Terrain" type="Node3D" parent="."]
+script = ExtResource("2_terrain")
+
+[node name="Boundary" type="StaticBody3D" parent="."]
+script = ExtResource("16_boundary")
+
+[node name="Water" type="Node3D" parent="."]
+script = ExtResource("6_water")
+
+[node name="Grass" type="Node3D" parent="."]
+script = ExtResource("7_grass")
+
+[node name="Levels" type="Node3D" parent="."]
+
+[node name="Meadow" parent="Levels" instance=ExtResource("8_meadow")]
+
+[node name="MushroomForest" parent="Levels" instance=ExtResource("9_forest")]
+
+[node name="ForgottenShrine" parent="Levels" instance=ExtResource("10_shrine")]
+
+[node name="CrystalGarden" parent="Levels" instance=ExtResource("11_garden")]
+
+[node name="ResearchLift" type="Node3D" parent="."]
+position = Vector3(-14, 0, -406)
+script = ExtResource("17_lift")
+
+[node name="Player" parent="." instance=ExtResource("3_player")]
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("4_camera")
+
+[node name="Atmosphere" type="Node" parent="."]
+script = ExtResource("5_atmo")
+
+[node name="Director" type="Node" parent="."]
+script = ExtResource("15_director")
+
+[node name="Hud" parent="." instance=ExtResource("12_hud")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("13_pause")]
+
+[node name="CompletionScreen" parent="." instance=ExtResource("14_complete")]

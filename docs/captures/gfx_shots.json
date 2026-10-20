@@ -1,0 +1,224 @@
+[
+ {
+  "name": "gfx_sc5_arrival",
+  "at": [
+   0,
+   0.1,
+   27
+  ],
+  "yaw": 180,
+  "cam_yaw": 160,
+  "cam_pitch": -12,
+  "distance": 6.0,
+  "wait": 140
+ },
+ {
+  "name": "gfx_sc5_breaker",
+  "at": [
+   -13,
+   0.1,
+   24
+  ],
+  "yaw": 90,
+  "cam_yaw": 60,
+  "cam_pitch": -12,
+  "distance": 5.0,
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc5_hidden",
+  "free_cam": [
+   19,
+   4.6,
+   3
+  ],
+  "look": [
+   23,
+   2.6,
+   -5
+  ],
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc6_vista",
+  "free_cam": [
+   318,
+   14,
+   18
+  ],
+  "look": [
+   300,
+   4,
+   -28
+  ],
+  "wait": 60
+ },
+ {
+  "name": "gfx_sc6_cores",
+  "free_cam": [
+   309,
+   9,
+   -19
+  ],
+  "look": [
+   300,
+   5,
+   -32
+  ],
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc6_arms",
+  "free_cam": [
+   306,
+   8,
+   3
+  ],
+  "look": [
+   300,
+   4,
+   -12
+  ],
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc7_well",
+  "free_cam": [
+   605,
+   4,
+   19
+  ],
+  "look": [
+   598,
+   7,
+   4
+  ],
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc7_phase",
+  "free_cam": [
+   610,
+   15,
+   -6
+  ],
+  "look": [
+   600,
+   10,
+   -26
+  ],
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc7_final",
+  "free_cam": [
+   626,
+   16,
+   -36
+  ],
+  "look": [
+   634,
+   13.5,
+   -54
+  ],
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc5_optics",
+  "free_cam": [
+   -10,
+   3.6,
+   6
+  ],
+  "look": [
+   3,
+   1.0,
+   -8
+  ],
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc5_control",
+  "free_cam": [
+   -14.5,
+   4.5,
+   -25.5
+  ],
+  "look": [
+   -4,
+   1.2,
+   -36
+  ],
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc6_walkway",
+  "free_cam": [
+   303,
+   3.0,
+   30
+  ],
+  "look": [
+   300,
+   1.5,
+   14
+  ],
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc7_antechamber",
+  "free_cam": [
+   604.5,
+   3,
+   32
+  ],
+  "look": [
+   599,
+   2,
+   22
+  ],
+  "wait": 40
+ },
+ {
+  "name": "gfx_sc6_sea",
+  "free_cam": [
+   316,
+   7,
+   8
+  ],
+  "look": [
+   285,
+   -12,
+   -40
+  ],
+  "wait": 60
+ },
+ {
+  "name": "gfx_sc7_vista",
+  "free_cam": [
+   618,
+   14,
+   -20
+  ],
+  "look": [
+   620,
+   16,
+   -120
+  ],
+  "wait": 60
+ },
+ {
+  "name": "gfx_sc7_corridor",
+  "free_cam": [
+   607,
+   12.2,
+   -37.5
+  ],
+  "look": [
+   620,
+   10.5,
+   -42
+  ],
+  "wait": 40
+ }
+]

@@ -1,0 +1,71 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/facility/areas/quantum_area.gd" id="1_area"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/checkpoint.tscn" id="2_checkpoint"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/discovery_spot.tscn" id="3_discovery"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/energy_fragment.tscn" id="4_fragment"]
+
+[node name="QuantumLab" type="Node3D"]
+script = ExtResource("1_area")
+area_id = &"quantum"
+
+[node name="CheckpointEntry" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(0.0, 0.05, 25.5)
+snap_to_ground = false
+checkpoint_id = &"quantum_entry"
+radius = 2.6
+
+[node name="CheckpointGravity" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(0.0, 10.05, -3.2)
+snap_to_ground = false
+checkpoint_id = &"quantum_gravity"
+radius = 2.6
+
+[node name="CheckpointPhase" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(5.0, 10.05, -40.5)
+rotation = Vector3(0, -1.5707963267948966, 0)
+snap_to_ground = false
+checkpoint_id = &"quantum_phase"
+radius = 2.4
+
+[node name="CheckpointFinal" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(33.0, 10.05, -38.0)
+snap_to_ground = false
+checkpoint_id = &"quantum_final"
+radius = 2.6
+
+[node name="Fragment1" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(5.0, 7.6, 9.0)
+snap_to_ground = false
+fragment_id = &"quantum_1"
+
+[node name="Fragment2" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-8.5, 10.9, -21.0)
+snap_to_ground = false
+fragment_id = &"quantum_2"
+
+[node name="Fragment3" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(21.75, 10.9, -41.25)
+snap_to_ground = false
+fragment_id = &"quantum_3"
+
+[node name="Fragment4" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-6.6, 6.7, 15.5)
+snap_to_ground = false
+fragment_id = &"quantum_4"
+
+[node name="TimeEcho" parent="." instance=ExtResource("3_discovery")]
+position = Vector3(2.5, 10.0, -42.2)
+snap_to_ground = false
+discovery_id = &"time_echo"
+prompt = "Wave hello"
+interact_radius = 1.8
+focus_offset = Vector3(0, 0.6, 0)
+
+[node name="FoldedRoom" parent="." instance=ExtResource("3_discovery")]
+position = Vector3(-3.5, 0.0, 29.0)
+snap_to_ground = false
+discovery_id = &"folded_room"
+prompt = "Look up"
+interact_radius = 2.0
+focus_offset = Vector3(0, 1.2, 0)

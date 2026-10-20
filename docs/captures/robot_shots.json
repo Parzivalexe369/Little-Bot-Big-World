@@ -1,0 +1,146 @@
+[
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "wait": 70,
+  "cam_pitch": -8,
+  "distance": 1.7,
+  "name": "c01_face_meadow",
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 0,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ]
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "wait": 70,
+  "cam_pitch": -8,
+  "distance": 1.7,
+  "name": "c02_threequarter_forest",
+  "player": [
+   -28,
+   -96
+  ],
+  "yaw": 150,
+  "cam_yaw": 310,
+  "restore": [
+   1,
+   1,
+   0,
+   0
+  ]
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "wait": 70,
+  "cam_pitch": -8,
+  "distance": 1.7,
+  "name": "c03_side_garden",
+  "player": [
+   2,
+   -350
+  ],
+  "yaw": 170,
+  "cam_yaw": 80,
+  "restore": [
+   1,
+   1,
+   1,
+   1
+  ],
+  "awake": 1
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "wait": 70,
+  "cam_pitch": -14,
+  "distance": 2.4,
+  "name": "c04_back_shrine",
+  "player": [
+   24,
+   -262
+  ],
+  "yaw": 200,
+  "cam_yaw": 200,
+  "restore": [
+   1,
+   1,
+   1,
+   0
+  ]
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "wait": 14,
+  "cam_pitch": -8,
+  "distance": 1.7,
+  "name": "c05_happy",
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 0,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "fragments": 1
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "wait": 38,
+  "cam_pitch": -8,
+  "distance": 1.7,
+  "name": "c06_land_squash",
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 0,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "press": [
+   "hop"
+  ],
+  "hold": 8
+ }
+]

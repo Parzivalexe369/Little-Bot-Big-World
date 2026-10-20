@@ -1,0 +1,11 @@
+[
+ {"name": "sc5_arrival", "at": [0, 0.1, 27], "yaw": 180, "cam_yaw": 160, "cam_pitch": -12, "distance": 6.0, "wait": 140},
+ {"name": "sc5_breaker", "at": [-13, 0.1, 24], "yaw": 90, "cam_yaw": 60, "cam_pitch": -12, "distance": 5.0, "wait": 40},
+ {"name": "sc5_hidden", "free_cam": [19, 4.6, 3], "look": [23, 2.6, -5], "wait": 40},
+ {"name": "sc6_vista", "free_cam": [318, 14, 18], "look": [300, 4, -28], "wait": 60},
+ {"name": "sc6_cores", "free_cam": [309, 9, -19], "look": [300, 5, -32], "wait": 40},
+ {"name": "sc6_arms", "free_cam": [306, 8, 3], "look": [300, 4, -12], "wait": 40},
+ {"name": "sc7_well", "free_cam": [605, 4, 19], "look": [598, 7, 4], "wait": 40},
+ {"name": "sc7_phase", "free_cam": [610, 15, -6], "look": [600, 10, -26], "wait": 40},
+ {"name": "sc7_final", "free_cam": [626, 16, -36], "look": [634, 13.5, -54], "wait": 40}
+]

@@ -1,0 +1,11 @@
+[
+ {"name": "sc01_meadow_dormant", "player": [3, 30], "yaw": 15, "cam_pitch": -16, "distance": 4.2, "wait": 120, "restore": [0,0,0,0]},
+ {"name": "sc02_meadow_restored", "player": [3, 30], "yaw": 15, "cam_pitch": -16, "distance": 4.2, "wait": 60, "restore": [1,0,0,0]},
+ {"name": "sc03_forest_dormant", "player": [-12, -112], "yaw": -100, "cam_pitch": -14, "distance": 4.5, "wait": 60, "restore": [1,0,0,0]},
+ {"name": "sc04_forest_restored", "player": [-12, -112], "yaw": -100, "cam_pitch": -14, "distance": 4.5, "wait": 60, "restore": [1,1,0,0]},
+ {"name": "sc05_shrine_dormant", "player": [26, -254], "yaw": 160, "cam_pitch": -18, "distance": 6, "wait": 60, "restore": [1,1,0,0]},
+ {"name": "sc06_shrine_restored", "player": [26, -254], "yaw": 160, "cam_pitch": -18, "distance": 6, "wait": 60, "restore": [1,1,1,0]},
+ {"name": "sc07_garden_dormant", "player": [2, -350], "yaw": 170, "cam_pitch": -14, "distance": 5, "wait": 60, "restore": [1,1,1,0]},
+ {"name": "sc08_garden_restored", "player": [2, -350], "yaw": 170, "cam_pitch": -14, "distance": 5, "wait": 60, "restore": [1,1,1,1], "awake": 1},
+ {"name": "sc09_hud", "player": [4, 44], "yaw": 0, "cam_pitch": -14, "distance": 3.6, "wait": 60, "restore": [0,0,0,0], "hud": true}
+]

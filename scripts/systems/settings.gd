@@ -1,0 +1,161 @@
+extends Node
+## Player settings persisted separately from the save game, so New Game never touches them.
+
+signal changed
+
+const PATH := "user://settings.cfg"
+const RESOLUTIONS: Array[Vector2i] = [
+	Vector2i(1280, 720), Vector2i(1366, 768), Vector2i(1600, 900),
+	Vector2i(1920, 1080), Vector2i(2560, 1440), Vector2i(3840, 2160),
+]
+const QUALITY_NAMES := ["Low", "Medium", "High"]
+
+var master_volume := 0.85
+var music_volume := 0.6
+var sfx_volume := 0.8
+var ambient_volume := 0.75
+var mouse_sensitivity := 1.0
+var invert_x := false
+var invert_y := false
+var camera_assist := true
+var fov := 70.0
+var fullscreen := false
+var resolution := Vector2i(1600, 900)
+var vsync := true
+var quality := 1
+var render_scale := 1.0
+
+
+func _ready() -> void:
+	load_settings()
+	apply_audio()
+	# Display changes need a running window; defer one frame.
+	apply_display.call_deferred()
+
+
+func load_settings() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(PATH) != OK:
+		quality = _default_quality()
+		return
+	master_volume = clampf(cfg.get_value("audio", "master", master_volume), 0.0, 1.0)
+	music_volume = clampf(cfg.get_value("audio", "music", music_volume), 0.0, 1.0)
+	sfx_volume = clampf(cfg.get_value("audio", "sfx", sfx_volume), 0.0, 1.0)
+	ambient_volume = clampf(cfg.get_value("audio", "ambient", ambient_volume), 0.0, 1.0)
+	mouse_sensitivity = clampf(cfg.get_value("controls", "mouse_sensitivity", mouse_sensitivity), 0.1, 3.0)
+	invert_x = bool(cfg.get_value("controls", "invert_x", invert_x))
+	invert_y = bool(cfg.get_value("controls", "invert_y", invert_y))
+	camera_assist = bool(cfg.get_value("controls", "camera_assist", camera_assist))
+	fov = clampf(cfg.get_value("video", "fov", fov), 55.0, 95.0)
+	fullscreen = bool(cfg.get_value("video", "fullscreen", fullscreen))
+	var res: Variant = cfg.get_value("video", "resolution", resolution)
+	if res is Vector2i:
+		resolution = res
+	vsync = bool(cfg.get_value("video", "vsync", vsync))
+	quality = clampi(int(cfg.get_value("video", "quality", quality)), 0, 2)
+	render_scale = clampf(cfg.get_value("video", "render_scale", render_scale), 0.5, 1.0)
+
+
+func save_settings() -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("audio", "master", master_volume)
+	cfg.set_value("audio", "music", music_volume)
+	cfg.set_value("audio", "sfx", sfx_volume)
+	cfg.set_value("audio", "ambient", ambient_volume)
+	cfg.set_value("controls", "mouse_sensitivity", mouse_sensitivity)
+	cfg.set_value("controls", "invert_x", invert_x)
+	cfg.set_value("controls", "invert_y", invert_y)
+	cfg.set_value("controls", "camera_assist", camera_assist)
+	cfg.set_value("video", "fov", fov)
+	cfg.set_value("video", "fullscreen", fullscreen)
+	cfg.set_value("video", "resolution", resolution)
+	cfg.set_value("video", "vsync", vsync)
+	cfg.set_value("video", "quality", quality)
+	cfg.set_value("video", "render_scale", render_scale)
+	var err := cfg.save(PATH)
+	if err != OK:
+		push_warning("Could not save settings: %s" % error_string(err))
+
+
+## Call after changing any value; applies and persists everything.
+func commit() -> void:
+	apply_audio()
+	apply_display()
+	save_settings()
+	changed.emit()
+
+
+func apply_audio() -> void:
+	_set_bus("Master", master_volume)
+	_set_bus("Music", music_volume)
+	_set_bus("SFX", sfx_volume)
+	_set_bus("Ambient", ambient_volume)
+
+
+func apply_display() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	var window := get_window()
+	if fullscreen:
+		window.mode = Window.MODE_FULLSCREEN
+	else:
+		if window.mode != Window.MODE_WINDOWED:
+			window.mode = Window.MODE_WINDOWED
+		var screen_size := DisplayServer.screen_get_size(window.current_screen)
+		var size := Vector2i(mini(resolution.x, screen_size.x), mini(resolution.y, screen_size.y))
+		if window.size != size:
+			window.size = size
+			window.position = DisplayServer.screen_get_position(window.current_screen) + (screen_size - size) / 2
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED)
+	var vp := get_viewport()
+	vp.scaling_3d_scale = render_scale
+	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if render_scale < 0.99 else Viewport.SCALING_3D_MODE_BILINEAR
+	vp.msaa_3d = Viewport.MSAA_DISABLED if quality == 0 else (Viewport.MSAA_2X if quality == 1 else Viewport.MSAA_4X)
+	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if quality == 0 else Viewport.SCREEN_SPACE_AA_DISABLED
+
+
+## Quality-dependent tuning read by the world (shadows, vegetation density, post effects).
+func quality_params() -> Dictionary:
+	match quality:
+		0:
+			return {"shadow_distance": 60.0, "shadow_size": 2048, "ssao": false, "glow": true,
+				"grass_density": 0.45, "detail_range": 70.0, "fog_volumetric": false, "ssr": false,
+				"ssil": false, "ssil_quality": 0, "dof": false, "shadow_filter": 1}
+		2:
+			return {"shadow_distance": 140.0, "shadow_size": 4096, "ssao": true, "glow": true,
+				"grass_density": 1.0, "detail_range": 150.0, "fog_volumetric": true, "ssr": true,
+				"ssil": true, "ssil_quality": 2, "dof": true, "shadow_filter": 3}
+		_:
+			return {"shadow_distance": 100.0, "shadow_size": 4096, "ssao": true, "glow": true,
+				"grass_density": 0.75, "detail_range": 110.0, "fog_volumetric": true, "ssr": false,
+				"ssil": true, "ssil_quality": 0, "dof": false, "shadow_filter": 2}
+
+
+func available_resolutions() -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	var screen := Vector2i(3840, 2160)
+	if DisplayServer.get_name() != "headless":
+		screen = DisplayServer.screen_get_size()
+	for r in RESOLUTIONS:
+		if r.x <= screen.x and r.y <= screen.y:
+			out.append(r)
+	if not out.has(resolution):
+		out.append(resolution)
+	return out
+
+
+func _set_bus(bus_name: String, linear: float) -> void:
+	var idx := AudioServer.get_bus_index(bus_name)
+	if idx < 0:
+		return
+	AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(linear, 0.0001)))
+	AudioServer.set_bus_mute(idx, linear <= 0.001)
+
+
+func _default_quality() -> int:
+	if DisplayServer.get_name() == "headless":
+		return 1
+	var adapter := RenderingServer.get_video_adapter_name().to_lower()
+	if adapter.contains("intel") or adapter.contains("radeon(tm) graphics"):
+		return 0
+	return 1

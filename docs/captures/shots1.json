@@ -1,0 +1,5 @@
+[
+ {"name": "t01_start", "player": [0, 50], "yaw": 0, "cam_pitch": -12, "wait": 60},
+ {"name": "t02_close", "player": [0, 50], "yaw": 150, "cam_yaw": 0, "cam_pitch": -8, "distance": 2.2, "wait": 30},
+ {"name": "t03_overview", "free_cam": [60, 60, 90], "look": [0, 0, -40], "wait": 30}
+]

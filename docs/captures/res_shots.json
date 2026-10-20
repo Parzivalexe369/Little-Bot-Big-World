@@ -1,0 +1,126 @@
+[
+ {
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 15,
+  "cam_pitch": -14,
+  "distance": 3.8,
+  "wait": 60,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "hud": true,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "toast": [
+   "Energy fragment collected",
+   "energy"
+  ],
+  "discovery": "watering_can",
+  "name": "r01_720p",
+  "window": [
+   1280,
+   720
+  ]
+ },
+ {
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 15,
+  "cam_pitch": -14,
+  "distance": 3.8,
+  "wait": 60,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "hud": true,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "toast": [
+   "Energy fragment collected",
+   "energy"
+  ],
+  "discovery": "watering_can",
+  "name": "r02_ultrawide",
+  "window": [
+   1720,
+   737
+  ]
+ },
+ {
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 15,
+  "cam_pitch": -14,
+  "distance": 3.8,
+  "wait": 60,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "hud": true,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "toast": [
+   "Energy fragment collected",
+   "energy"
+  ],
+  "discovery": "watering_can",
+  "name": "r03_4by3",
+  "window": [
+   1200,
+   900
+  ]
+ },
+ {
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 15,
+  "cam_pitch": -14,
+  "distance": 3.8,
+  "wait": 60,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "hud": true,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "toast": [
+   "Energy fragment collected",
+   "energy"
+  ],
+  "discovery": "watering_can",
+  "name": "r04_1600",
+  "window": [
+   1600,
+   900
+  ]
+ }
+]

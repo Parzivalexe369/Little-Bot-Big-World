@@ -1,0 +1,35 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/facility/facility_world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://scripts/player/camera_rig.gd" id="3_camera"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="4_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="5_pause"]
+[ext_resource type="PackedScene" path="res://scenes/facility/research_lab.tscn" id="6_research_lab"]
+[ext_resource type="PackedScene" path="res://scenes/facility/alien_reactor.tscn" id="7_alien_reactor"]
+[ext_resource type="PackedScene" path="res://scenes/facility/quantum_lab.tscn" id="8_quantum_lab"]
+
+[node name="Facility" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+[node name="Levels" type="Node3D" parent="."]
+
+[node name="ResearchLab" parent="Levels" instance=ExtResource("6_research_lab")]
+position = Vector3(0.0, 0.0, 0.0)
+
+[node name="AlienReactor" parent="Levels" instance=ExtResource("7_alien_reactor")]
+position = Vector3(300.0, 0.0, 0.0)
+
+[node name="QuantumLab" parent="Levels" instance=ExtResource("8_quantum_lab")]
+position = Vector3(600.0, 0.0, 0.0)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("3_camera")
+
+[node name="Hud" parent="." instance=ExtResource("4_hud")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("5_pause")]

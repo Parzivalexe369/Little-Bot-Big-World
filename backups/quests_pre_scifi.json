@@ -1,0 +1,78 @@
+{
+	"version": 1,
+	"objectives": [
+		{
+			"id": "wake",
+			"text": "Wake up.",
+			"done": {"flag": "robot_awake"}
+		},
+		{
+			"id": "gather_meadow",
+			"text": "Gather glowing energy fragments in the meadow ({energy}/{gate_energy}).",
+			"done": {"energy": "gate_energy"}
+		},
+		{
+			"id": "power_gate",
+			"text": "Power the old gate at the end of the path.",
+			"done": {"flag": "meadow_gate_open"}
+		},
+		{
+			"id": "enter_forest",
+			"text": "Enter the Mushroom Forest.",
+			"done": {"flag": "visited_forest"}
+		},
+		{
+			"id": "find_way",
+			"text": "Find a way through the forest.",
+			"done": {"any": [{"flag": "saw_bridge"}, {"set": "forest_switches", "count": 1}]}
+		},
+		{
+			"id": "forest_switches",
+			"text": "Follow the old cables to the hidden switches ({count}/{target}). Scanning helps.",
+			"done": {"set": "forest_switches", "count": "forest_switch_count"},
+			"progress": {"set": "forest_switches", "target": "forest_switch_count"}
+		},
+		{
+			"id": "raise_bridge",
+			"text": "Raise the old bridge.",
+			"done": {"flag": "bridge_raised"}
+		},
+		{
+			"id": "find_shrine",
+			"text": "Climb to the forgotten shrine.",
+			"done": {"flag": "shrine_plaza_reached"}
+		},
+		{
+			"id": "shrine_nodes",
+			"text": "Wake the shrine's power nodes ({count}/{target}).",
+			"done": {"set": "shrine_nodes", "count": "shrine_node_count"},
+			"progress": {"set": "shrine_nodes", "target": "shrine_node_count"}
+		},
+		{
+			"id": "shrine_core",
+			"text": "Awaken the shrine core.",
+			"done": {"flag": "shrine_restored"}
+		},
+		{
+			"id": "enter_garden",
+			"text": "Pass through the great door into the Crystal Garden.",
+			"done": {"flag": "visited_garden"}
+		},
+		{
+			"id": "resonators",
+			"text": "Wake the three crystal resonators ({count}/{target}).",
+			"done": {"set": "resonators", "count": "resonator_count"},
+			"progress": {"set": "resonators", "target": "resonator_count"}
+		},
+		{
+			"id": "heart",
+			"text": "Restore the Crystal Heart at the far end of the garden.",
+			"done": {"flag": "garden_restored"}
+		},
+		{
+			"id": "explore",
+			"text": "The world is awake. Explore and find its secrets ({energy}/{total_fragments} fragments, {discoveries}/{total_discoveries} discoveries).",
+			"done": {"never": true}
+		}
+	]
+}

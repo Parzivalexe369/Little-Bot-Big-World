@@ -1,0 +1,64 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/facility/areas/lab_area.gd" id="1_area"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/checkpoint.tscn" id="2_checkpoint"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/discovery_spot.tscn" id="3_discovery"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/energy_fragment.tscn" id="4_fragment"]
+
+[node name="ResearchLab" type="Node3D"]
+script = ExtResource("1_area")
+area_id = &"lab"
+
+[node name="CheckpointEntry" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(0.0, 0.05, 24.5)
+snap_to_ground = false
+checkpoint_id = &"lab_entry"
+radius = 3.0
+
+[node name="CheckpointOptics" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(0.0, 0.05, 6.0)
+snap_to_ground = false
+checkpoint_id = &"lab_optics"
+radius = 3.0
+
+[node name="CheckpointControl" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(-6.0, 0.05, -25.5)
+snap_to_ground = false
+checkpoint_id = &"lab_control"
+radius = 3.0
+
+[node name="Fragment1" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-5.5, 2.75, 21.0)
+snap_to_ground = false
+fragment_id = &"lab_1"
+
+[node name="Fragment2" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(11.0, 1.15, 5.5)
+snap_to_ground = false
+fragment_id = &"lab_2"
+
+[node name="Fragment3" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(23.5, 3.1, 2.0)
+snap_to_ground = false
+fragment_id = &"lab_3"
+
+[node name="Fragment4" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(20.5, 3.1, -6.5)
+snap_to_ground = false
+fragment_id = &"lab_4"
+
+[node name="ExperimentLog" parent="." instance=ExtResource("3_discovery")]
+position = Vector3(22.0, 2.2, -2.0)
+snap_to_ground = false
+discovery_id = &"experiment_log"
+prompt = "Read the log"
+interact_radius = 1.8
+focus_offset = Vector3(0, 1.0, 0)
+
+[node name="Blueprint" parent="." instance=ExtResource("3_discovery")]
+position = Vector3(2.0, 0.0, -27.5)
+snap_to_ground = false
+discovery_id = &"helper_blueprint"
+prompt = "Look at the hologram"
+interact_radius = 2.0
+focus_offset = Vector3(0, 0.9, 0)

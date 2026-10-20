@@ -1,0 +1,75 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/areas/meadow_area.gd" id="1_area"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/checkpoint.tscn" id="2_checkpoint"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/discovery_spot.tscn" id="3_discovery"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/energy_fragment.tscn" id="4_fragment"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/root_gate.tscn" id="5_gate"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/charging_station.tscn" id="6_station"]
+
+[node name="Meadow" type="Node3D"]
+script = ExtResource("1_area")
+
+[node name="ChargingStation" parent="." instance=ExtResource("6_station")]
+position = Vector3(0.0, 0.0, 60.0)
+device_id = &"station"
+
+[node name="CheckpointStation" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(0.0, 0.0, 59.6)
+rotation = Vector3(0, 3.141592653589793, 0)
+checkpoint_id = &"station"
+announce = false
+radius = 3.0
+
+[node name="DockPlaque" parent="." instance=ExtResource("3_discovery")]
+position = Vector3(0.0, 0.0, 60.75)
+discovery_id = &"dock_plaque"
+prompt = "Read the plaque"
+interact_radius = 1.1
+focus_offset = Vector3(0, 0.7, 0)
+
+[node name="Fragment1" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(4.6, 0.0, 44.0)
+fragment_id = &"meadow_1"
+
+[node name="Fragment2" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-10.0, 0.0, 17.0)
+fragment_id = &"meadow_2"
+
+[node name="Fragment3" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-19.5, 0.0, 22.5)
+fragment_id = &"meadow_3"
+
+[node name="Fragment4" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(26.0, 0.0, 2.0)
+fragment_id = &"meadow_4"
+ground_offset = 2.75
+
+[node name="Fragment5" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-38.0, 0.0, -8.0)
+fragment_id = &"meadow_5"
+hidden_until_scanned = true
+
+[node name="Fragment6" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(2.4, 0.0, 66.5)
+fragment_id = &"meadow_6"
+
+[node name="Fragment7" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(41.5, 0.0, 28.0)
+fragment_id = &"meadow_7"
+
+[node name="WateringCanStory" parent="." instance=ExtResource("3_discovery")]
+position = Vector3(38.6, 0.0, 28.0)
+discovery_id = &"watering_can"
+prompt = "Look around"
+interact_radius = 1.6
+
+[node name="RootGate" parent="." instance=ExtResource("5_gate")]
+position = Vector3(-2.6, 0.0, -55.0)
+rotation = Vector3(0, -2.677945044588987, 0)
+device_id = &"meadow_gate"
+
+[node name="CheckpointGate" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(-7.0, 0.0, -65.0)
+rotation = Vector3(0, -2.498091544796509, 0)
+checkpoint_id = &"meadow_gate"

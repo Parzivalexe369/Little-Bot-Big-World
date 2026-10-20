@@ -1,0 +1,220 @@
+[
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "cam_pitch": -4,
+  "distance": 2.4,
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 90,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "press": [
+   "hop"
+  ],
+  "hold": 12,
+  "name": "seq_01",
+  "wait": 1
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "cam_pitch": -4,
+  "distance": 2.4,
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 90,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "press": [
+   "hop"
+  ],
+  "hold": 12,
+  "name": "seq_06",
+  "wait": 6
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "cam_pitch": -4,
+  "distance": 2.4,
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 90,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "press": [
+   "hop"
+  ],
+  "hold": 12,
+  "name": "seq_20",
+  "wait": 20
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "cam_pitch": -4,
+  "distance": 2.4,
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 90,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "press": [
+   "hop"
+  ],
+  "hold": 12,
+  "name": "seq_34",
+  "wait": 34
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "cam_pitch": -4,
+  "distance": 2.4,
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 90,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "press": [
+   "hop"
+  ],
+  "hold": 12,
+  "name": "seq_38",
+  "wait": 38
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "cam_pitch": -4,
+  "distance": 2.4,
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 90,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "press": [
+   "hop"
+  ],
+  "hold": 12,
+  "name": "seq_42",
+  "wait": 42
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "cam_pitch": -4,
+  "distance": 2.4,
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 90,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "press": [
+   "hop"
+  ],
+  "hold": 12,
+  "name": "seq_48",
+  "wait": 48
+ },
+ {
+  "hud": false,
+  "input": true,
+  "flags": {
+   "robot_awake": true
+  },
+  "cam_pitch": -8,
+  "distance": 3.0,
+  "player": [
+   3,
+   30
+  ],
+  "yaw": 180,
+  "cam_yaw": 170,
+  "restore": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "press": [
+   "move_left",
+   "boost"
+  ],
+  "hold": 60,
+  "name": "seq_boost",
+  "keep_pressed": true,
+  "wait": 1
+ }
+]

@@ -1,0 +1,64 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/facility/areas/reactor_area.gd" id="1_area"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/checkpoint.tscn" id="2_checkpoint"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/discovery_spot.tscn" id="3_discovery"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/energy_fragment.tscn" id="4_fragment"]
+
+[node name="AlienReactor" type="Node3D"]
+script = ExtResource("1_area")
+area_id = &"reactor"
+
+[node name="CheckpointEntry" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(0.0, 0.05, 30.5)
+snap_to_ground = false
+checkpoint_id = &"reactor_entry"
+radius = 3.0
+
+[node name="CheckpointCrossing" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(0.0, 4.05, -0.6)
+snap_to_ground = false
+checkpoint_id = &"reactor_crossing"
+radius = 2.4
+
+[node name="CheckpointCores" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(6.0, 4.05, -24.5)
+snap_to_ground = false
+checkpoint_id = &"reactor_cores"
+radius = 2.6
+
+[node name="Fragment1" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(0.0, 0.9, 13.5)
+snap_to_ground = false
+fragment_id = &"reactor_1"
+
+[node name="Fragment2" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-10.5, 4.9, -37.5)
+snap_to_ground = false
+fragment_id = &"reactor_2"
+
+[node name="Fragment3" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(11.6, 8.9, -38.8)
+snap_to_ground = false
+fragment_id = &"reactor_3"
+
+[node name="Fragment4" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-5.8, 0.9, 35.8)
+snap_to_ground = false
+fragment_id = &"reactor_4"
+
+[node name="ReactorHeart" parent="." instance=ExtResource("3_discovery")]
+position = Vector3(3.2, 4.0, -27.6)
+snap_to_ground = false
+discovery_id = &"reactor_heart"
+prompt = "Look into the core"
+interact_radius = 2.0
+focus_offset = Vector3(0, 0.8, 0)
+
+[node name="BuilderGlyphs" parent="." instance=ExtResource("3_discovery")]
+position = Vector3(-9.2, 8.0, -38.8)
+snap_to_ground = false
+discovery_id = &"builder_glyphs"
+prompt = "Study the glyphs"
+interact_radius = 1.8
+focus_offset = Vector3(0, 1.0, 0)

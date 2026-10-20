@@ -1,0 +1,40 @@
+[
+ {
+  "name": "menu_now",
+  "wait": 150,
+  "hud": true
+ },
+ {
+  "name": "menu_hover",
+  "wait": 30,
+  "hud": true,
+  "focus_button": "New Game"
+ },
+ {
+  "name": "menu_720p",
+  "wait": 40,
+  "hud": true,
+  "window": [
+   1280,
+   720
+  ]
+ },
+ {
+  "name": "menu_ultrawide",
+  "wait": 40,
+  "hud": true,
+  "window": [
+   1720,
+   737
+  ]
+ },
+ {
+  "name": "menu_4by3",
+  "wait": 40,
+  "hud": true,
+  "window": [
+   1200,
+   900
+  ]
+ }
+]

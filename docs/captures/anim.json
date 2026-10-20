@@ -1,0 +1,7 @@
+[
+ {"name": "an01_idle", "player": [3, 30], "yaw": 200, "cam_yaw": 20, "cam_pitch": -10, "distance": 2.6, "wait": 90, "restore": [1,0,0,0]},
+ {"name": "an02_moving", "player": [3, 30], "yaw": 0, "cam_yaw": 60, "cam_pitch": -10, "distance": 3.0, "press": ["move_forward"], "hold": 50, "keep_pressed": true, "wait": 0, "restore": [1,0,0,0]},
+ {"name": "an03_turning", "player": [3, 30], "yaw": 0, "cam_yaw": 0, "cam_pitch": -10, "distance": 3.0, "press": ["move_forward", "move_left"], "hold": 25, "keep_pressed": true, "wait": 0, "restore": [1,0,0,0]},
+ {"name": "an04_boost", "player": [3, 40], "yaw": 0, "cam_yaw": 30, "cam_pitch": -10, "distance": 3.2, "press": ["move_forward", "boost"], "hold": 70, "keep_pressed": true, "wait": 0, "restore": [1,0,0,0]},
+ {"name": "an05_scan", "player": [3, 30], "yaw": 200, "cam_yaw": 20, "cam_pitch": -12, "distance": 3.6, "press": ["scan"], "hold": 2, "wait": 22, "restore": [1,0,0,0]}
+]

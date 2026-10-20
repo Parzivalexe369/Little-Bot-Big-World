@@ -1,1 +1,161 @@
-# Little-Bot-Big-World
+# Little Bot, Big World
+
+A cozy third-person exploration game built in **Godot 4.7** (GDScript, Forward+).
+You play the small pink hover robot from `pink_ball_robot_with_THE_BALL_v2.blend`. It wakes
+in an enormous, sleeping garden and brings it back to life, one old machine at a time.
+
+## Running the game
+
+1. Install **Godot 4.7.2** (standard build) from https://godotengine.org. The editor is not
+   stored in the repository.
+2. Open the project folder in Godot, or run it directly. The repo's helper scripts in
+   `tools/` (tests, playtests, captures, exports) expect the Windows editor at
+   `tools/Godot_v4.7.2-stable_win64.exe` and `tools/Godot_v4.7.2-stable_win64_console.exe`,
+   so copy both there if you use them:
+
+```bash
+tools/Godot_v4.7.2-stable_win64.exe --path .
+```
+
+The main scene is `scenes/ui/main_menu.tscn`. Godot's import cache (`.godot/`) and exported
+builds (`build/`) are not committed, so the first launch imports every asset, which takes a
+few minutes.
+
+## Controls
+
+| Action | Keyboard / Mouse | Gamepad |
+|---|---|---|
+| Move | WASD / Arrow keys | Left stick |
+| Look | Mouse | Right stick |
+| Zoom | Mouse wheel | LB / RB |
+| Hover hop (hold for higher) | Space | A |
+| Boost | Shift | RT / L3 |
+| Interact | E (or F) | X |
+| Scan | Q | Y |
+| Journal | J / Tab | Back |
+| Pause | Esc | Start |
+
+## The journey
+
+1. **The Quiet Meadow.** Wake at the abandoned charging dock and gather energy fragments.
+   Then power the old gate's pylon to raise its shutter. The meadow's flowers open and its
+   colors return.
+2. **The Mushroom Forest.** Giant trunks, glowing mushrooms, a hollow log into a hidden
+   fairy ring. Follow old cables to three switches hidden under moss (the scanner reveals
+   them), then raise the bridge over the ravine.
+3. **The Forgotten Shrine.** Wake four power nodes:
+   - one needs 10 energy;
+   - one needs sunlight bounced off two rotating mirrors;
+   - one sits behind a wall only the scanner can read;
+   - one needs a broken conduit repaired by rotating stone tiles.
+
+   Then awaken the core. Lanterns light, a waterfall starts and the great door opens.
+4. **The Crystal Garden.** Wake three resonators:
+   - a prism light puzzle;
+   - one hidden in a humming crystal grotto;
+   - a melody puzzle with singing crystals.
+
+   Then restore the Crystal Heart (20 energy). The whole world wakes up, and a research lift
+   rises beside the Heart.
+5. **Abandoned Space Research Facility.** An orbital lab running on emergency power after
+   Experiment Seven. Restore power in three steps:
+   - re-energize five conduits with couplers that each flip the conduits their pipes touch;
+   - push mirror carts along floor rails to route a laser to the receiver;
+   - restart four terminals in the reverse of the logged shutdown order.
+
+   A loose vent, found with the scanner, hides a secret laboratory.
+6. **Alien Energy Reactor.** A vast cavern around a living alien core. Stabilize it:
+   - lock two swinging bridge arms at the moment they line up;
+   - balance energy between cores of capacity 8, 5 and 3 until two hold 4 each;
+   - wake four nodes, on pads reached by a moving lift and timed hard-light bridges, in
+     the rhythm the heart beats.
+
+   Plasma vents and the pit are the hazards.
+7. **Quantum Space-Time Laboratory.** A white, impossible lab floating in a nebula:
+   - low gravity to float up a well;
+   - shifting between dimensions A and B, where only one set of platforms is solid;
+   - freezing time to slip past spinning blades.
+
+   The exit core needs all three at once. Then a portal takes you home.
+
+The pause menu's **Travel** screen returns you to any area you have reached. In total
+there are 42 energy fragments and 14 discoveries.
+
+## Project layout
+
+```
+assets/characters/   robot GLBs exported from the .blend (+ eye-glow curves)
+assets/environment/  props.glb: every environment prop, modelled by a Blender script
+assets/textures/     photoscanned PBR sets (Poly Haven, CC0; see CREDITS.txt) + terrain arrays;
+                     scifi/ holds the six 2k sets used only by the sci-fi areas
+assets/fonts/        Fredoka + Nunito (SIL OFL) for the main menu
+scenes/facility/     the three sci-fi areas (facility.tscn + one level scene each)
+scripts/facility/    facility world, sci-fi kit (props/materials/lights), puzzle parts, areas/
+assets/audio/        synthesized SFX (wav), ambience/loops/music (ogg)
+scenes/              world, player, levels (one per area), interactables, ui
+scripts/systems/     autoloads: GameState, SaveSystem, Settings, Quests, Audio, SceneRouter, Events
+scripts/player/      player controller, robot visual + AnimationTree, camera rig, interactor
+scripts/gameplay/    fragments, checkpoints, devices and puzzles
+scripts/world/       terrain generator, layout, grass, water, area decoration, atmosphere, director
+shaders/             terrain (PBR layers), props (triplanar PBR), foliage, water, crystal, sky, devices, UI
+resources/           quests.json (data-driven objectives), ui_theme.tres, terrain cache
+tests/               logic tests (progression, quests, save/load, level data)
+tools/               asset pipeline + dev tools (see below)
+```
+
+Key ideas:
+
+- The **robot** is the original rig. All 12 baked actions run through an AnimationTree:
+  - idle, forward and lean blend space;
+  - one-shot actions (poke, scan, hop, victory, bump, fidgets);
+  - Shutdown played in reverse as the wake-up.
+
+  The Blender `eye_glow` custom property is converted into an animation track, so the eyes
+  flicker exactly as authored. Procedural layers add blinking, eye gaze toward interactables,
+  springy antennas and body tilt.
+- The **world** is one persistent scene. `WorldLayout` holds the hand-designed macro layout
+  (path, areas, ravine, ponds). `WorldTerrain` generates the ground from it, with collision
+  from a `HeightMapShape3D`. Area scenes place gameplay objects; their decoration scripts add
+  landmarks plus rule-based scatter, batched into chunked MultiMeshes.
+- **Restoration** is state-driven:
+  - flags in `GameState` drive a global shader vector (`restore_levels`), so grass, flowers
+    (petals fold shut while dormant), moss, mushrooms and crystals respond everywhere;
+  - devices restore their own state on load.
+- **Surfaces** use photoscanned PBR sets (albedo, OpenGL normal, AO/roughness/metal):
+  - the terrain blends 8 layers from compressed texture arrays, with two-scale
+    anti-tiling, height-aware transitions and triplanar rock on slopes;
+  - props get object-space triplanar scans (so moving parts don't swim), with textured
+    moss on upward faces;
+  - water refracts and absorbs light by depth, with a soft shoreline.
+- **Lighting** comes from `AtmosphereController`:
+  - per-area moods with indirect light (SSIL), volumetric fog with sun shafts, and mist
+    volumes over water;
+  - a gentle per-channel color grade on AgX;
+  - all scaled by the Low/Medium/High preset.
+- **Saving** is a versioned JSON file in `user://` with temp-file writes, a backup copy,
+  migration and validation. Settings are stored separately in `user://settings.cfg`.
+
+## Tools
+
+| Command | What it does |
+|---|---|
+| `blender -b <file>.blend --python tools/blender/export_robots.py` | Re-export the robots from the source .blend |
+| `blender -b --python tools/blender/build_props.py` | Rebuild `assets/environment/props.glb` |
+| `godot --headless --path . --script res://tools/build_texture_arrays.gd` | Rebuild the terrain texture arrays from `assets/textures/terrain_src` |
+| `godot --headless --path . --script res://tools/compare_props.gd -- old.glb new.glb` | Check that a props rebuild kept every prop's dimensions |
+| `python tools/gen_levels.py` | Regenerate the four level scenes from their layout tables |
+| `python tools/audio/generate_audio.py` | Re-synthesize all audio (uses ffmpeg for ogg if present) |
+| `tools/check.sh` | Import + compile-check every script |
+| `godot --headless --path . res://tests/test_runner.tscn` | Logic tests |
+| `tools/playtest.sh` | Automated end-to-end playthrough of the garden (windowed), screenshots in `docs/captures/` |
+| `tools/facility_playtest.sh` | Automated playthrough of the three sci-fi areas (every puzzle, hazard, save, travel) |
+| `blender -b --python tools/blender/build_scifi_props.py` | Rebuild `assets/environment/scifi_props.glb` |
+| `tools/facility_perf.sh` | GPU/CPU frame time at six spots in the sci-fi areas (`quality=N` optional) |
+| `godot --headless --path . --export-release "macOS" build/macos/LittleBotBigWorld.zip` | Universal macOS app (Intel + Apple Silicon, ad-hoc signed); see `build/macos/HOW_TO_RUN_ON_MAC.txt` |
+| `python tools/gen_facility_levels.py` | Regenerate the facility scenes (checkpoints, fragments, discoveries) |
+| `python tools/audio/generate_scifi_audio.py` | Synthesize the sci-fi sounds (leaves the original audio untouched) |
+| `tools/capture.sh <shots.json>` | Screenshots from scripted viewpoints (`docs/captures/baseline.json` = the before/after views) |
+| `godot --path . res://tools/perf_runner.tscn -- x z yaw [quality=N] [profile]` | Frame timing at a spot; `profile` measures each effect's cost |
+
+`gen_levels.py` overwrites the level scenes. If you prefer editing the levels in the Godot
+editor, stop using the generator after that point.

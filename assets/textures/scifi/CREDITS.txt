@@ -1,0 +1,5 @@
+Photoscanned PBR texture sets used only by the sci-fi areas (5-7), from Poly Haven
+(https://polyhaven.com), released under CC0 (public domain), 2k resolution.
+Sets: blue_metal_plate, metal_plate, metal_plate_02, hangar_concrete_floor,
+large_floor_tiles_02, concrete_floor_worn_001.
+Files: <set>_diff.jpg (albedo), <set>_nor.jpg (OpenGL normal), <set>_arm.jpg (AO/roughness/metal).

@@ -1,0 +1,6 @@
+Photoscanned PBR texture sets in this folder are from Poly Haven (https://polyhaven.com),
+released under CC0 (public domain). Sets: sparse_grass, stony_dirt_path, forest_ground_04,
+cliff_side, mossy_cobblestone, gravelly_sand, brown_mud_02, rock_boulder_dry, mossy_rock,
+bark_brown_02, rough_wood, sandstone_cracks, dark_rock, rusty_metal_02, rusty_painted_metal.
+Files: <set>_diff.jpg (albedo), <set>_nor.jpg (OpenGL normal), <set>_arm.jpg (AO/roughness/metal).
+terrain/terrain_*.res are texture arrays built from them by tools/build_texture_arrays.gd.

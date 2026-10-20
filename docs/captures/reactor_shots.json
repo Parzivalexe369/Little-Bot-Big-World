@@ -1,0 +1,6 @@
+[
+ {"name": "x01_entry", "at": [300, 0.1, 29], "yaw": 0, "cam_yaw": 0, "cam_pitch": -8, "distance": 5.5, "wait": 120},
+ {"name": "x02_vista", "free_cam": [318, 14, 18], "look": [300, 4, -28], "wait": 40},
+ {"name": "x03_arms", "free_cam": [306, 8, 3], "look": [300, 4, -12], "wait": 40},
+ {"name": "x04_cores", "free_cam": [309, 9, -19], "look": [300, 5, -32], "wait": 40}
+]

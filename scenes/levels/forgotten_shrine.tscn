@@ -1,0 +1,153 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/areas/shrine_area.gd" id="1_area"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/checkpoint.tscn" id="2_checkpoint"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/shrine_core.tscn" id="3_core"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/discovery_spot.tscn" id="4_discovery"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/great_door.tscn" id="5_door"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/beam_emitter.tscn" id="6_emitter"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/energy_fragment.tscn" id="7_fragment"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/hidden_wall.tscn" id="8_hidden_wall"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/junction_puzzle.tscn" id="9_junction"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/beam_mirror.tscn" id="10_mirror"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/power_node.tscn" id="11_node"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/old_robot.tscn" id="12_old_robot"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/beam_receiver.tscn" id="13_receiver"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/flag_trigger.tscn" id="14_trigger"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/waterfall.tscn" id="15_waterfall"]
+
+[node name="ForgottenShrine" type="Node3D"]
+script = ExtResource("1_area")
+
+[node name="CheckpointBridge" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(6.0, 0.0, -217.0)
+rotation = Vector3(0, 2.677945044588987, 0)
+checkpoint_id = &"forest_bridge"
+
+[node name="PlazaReached" parent="." instance=ExtResource("14_trigger")]
+position = Vector3(27.0, 0.0, -255.0)
+flag = &"shrine_plaza_reached"
+size = Vector3(14, 8, 10)
+
+[node name="CheckpointPlaza" parent="." instance=ExtResource("2_checkpoint")]
+position = Vector3(27.0, 0.0, -255.0)
+rotation = Vector3(0, 3.141592653589793, 0)
+checkpoint_id = &"shrine_plaza"
+
+[node name="ShrineCore" parent="." instance=ExtResource("3_core")]
+position = Vector3(30.0, 0.0, -269.0)
+device_id = &"shrine_core"
+
+[node name="NodeEnergy" parent="." instance=ExtResource("11_node")]
+position = Vector3(21.0, 0.0, -258.0)
+device_id = &"node_energy"
+mode = 0
+core_position = Vector3(30.0, 9.6, -269.0)
+
+[node name="NodeBeam" parent="." instance=ExtResource("11_node")]
+position = Vector3(38.5, 0.0, -261.0)
+device_id = &"node_beam"
+mode = 2
+core_position = Vector3(30.0, 9.6, -269.0)
+external_hint = "Dormant. It is waiting for sunlight."
+
+[node name="NodeHidden" parent="." instance=ExtResource("11_node")]
+position = Vector3(8.0, 0.0, -272.0)
+device_id = &"node_hidden"
+mode = 1
+core_position = Vector3(30.0, 9.6, -269.0)
+
+[node name="NodeConduit" parent="." instance=ExtResource("11_node")]
+position = Vector3(16.2, 0.0, -279.0)
+device_id = &"node_conduit"
+mode = 2
+core_position = Vector3(30.0, 9.6, -269.0)
+external_hint = "Dormant. Its power line is broken."
+
+[node name="SunEmitter" parent="." instance=ExtResource("6_emitter")]
+position = Vector3(46.0, 0.0, -246.0)
+device_id = &"sun_emitter_shrine"
+
+[node name="MirrorA" parent="." instance=ExtResource("10_mirror")]
+position = Vector3(46.0, 0.0, -256.0)
+device_id = &"mirror_a"
+start_step = 1
+ground_offset = -0.45
+
+[node name="MirrorB" parent="." instance=ExtResource("10_mirror")]
+position = Vector3(36.0, 0.0, -256.0)
+device_id = &"mirror_b"
+start_step = 5
+ground_offset = -0.45
+
+[node name="BeamReceiver" parent="." instance=ExtResource("13_receiver")]
+position = Vector3(36.0, 0.0, -261.5)
+solved_flag = &"beam_receiver_on"
+target_path = NodePath("../NodeBeam")
+ground_offset = 1.55
+
+[node name="HiddenWall" parent="." instance=ExtResource("8_hidden_wall")]
+position = Vector3(10.5, 0.0, -272.0)
+rotation = Vector3(0, 1.5707963267948966, 0)
+device_id = &"hidden_wall"
+
+[node name="JunctionPuzzle" parent="." instance=ExtResource("9_junction")]
+position = Vector3(14.0, 0.0, -286.0)
+device_id = &"junction"
+target_path = NodePath("../NodeConduit")
+
+[node name="Waterfall" parent="." instance=ExtResource("15_waterfall")]
+position = Vector3(54.0, 0.0, -279.0)
+rotation = Vector3(0, -1.0516502125483738, 0)
+device_id = &"waterfall"
+
+[node name="Mural" parent="." instance=ExtResource("4_discovery")]
+position = Vector3(19.0, 0.0, -266.0)
+rotation = Vector3(0, 1.5707963267948966, 0)
+discovery_id = &"shrine_mural"
+prop = "lore_tablet"
+prop_yaw = 0.0
+focus_offset = Vector3(0, 1.4, 0)
+interact_radius = 2.2
+
+[node name="Courier" parent="." instance=ExtResource("12_old_robot")]
+position = Vector3(37.0, 0.0, -289.0)
+rotation = Vector3(0, 2.792526803190927, 0)
+model = "the_ball_v2"
+discovery_id = &"wheeled_courier"
+slump_degrees = 4.0
+
+[node name="Fragment1" parent="." instance=ExtResource("7_fragment")]
+position = Vector3(15.5, 0.0, -236.5)
+fragment_id = &"shrine_1"
+
+[node name="Fragment2" parent="." instance=ExtResource("7_fragment")]
+position = Vector3(42.0, 0.0, -251.5)
+fragment_id = &"shrine_2"
+
+[node name="Fragment3" parent="." instance=ExtResource("7_fragment")]
+position = Vector3(9.4, 0.0, -270.6)
+fragment_id = &"shrine_3"
+
+[node name="Fragment4" parent="." instance=ExtResource("7_fragment")]
+position = Vector3(14.0, 0.0, -262.9)
+fragment_id = &"shrine_4"
+ground_offset = 3.5
+
+[node name="Fragment5" parent="." instance=ExtResource("7_fragment")]
+position = Vector3(50.0, 0.0, -268.0)
+fragment_id = &"shrine_5"
+
+[node name="Fragment6" parent="." instance=ExtResource("7_fragment")]
+position = Vector3(25.0, 0.0, -251.5)
+fragment_id = &"shrine_6"
+
+[node name="Fragment7" parent="." instance=ExtResource("7_fragment")]
+position = Vector3(12.0, 0.0, -252.0)
+fragment_id = &"shrine_7"
+hidden_until_scanned = true
+
+[node name="GreatDoor" parent="." instance=ExtResource("5_door")]
+position = Vector3(26.4, 0.0, -295.4)
+rotation = Vector3(0, -2.7367008673047097, 0)
+device_id = &"great_door"

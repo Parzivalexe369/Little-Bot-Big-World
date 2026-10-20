@@ -1,0 +1,88 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/areas/forest_area.gd" id="1_area"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/old_bridge.tscn" id="2_bridge"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/checkpoint.tscn" id="3_checkpoint"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/energy_fragment.tscn" id="4_fragment"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/old_robot.tscn" id="5_old_robot"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/flag_trigger.tscn" id="6_trigger"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/valve_switch.tscn" id="7_valve"]
+
+[node name="MushroomForest" type="Node3D"]
+script = ExtResource("1_area")
+
+[node name="CheckpointForest" parent="." instance=ExtResource("3_checkpoint")]
+position = Vector3(-15.0, 0.0, -75.0)
+rotation = Vector3(0, -2.498091544796509, 0)
+checkpoint_id = &"forest_entry"
+
+[node name="Fragment1" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-16.5, 0.0, -86.0)
+fragment_id = &"forest_1"
+
+[node name="Fragment2" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-55.0, 0.0, -101.0)
+fragment_id = &"forest_2"
+ground_offset = 3.55
+
+[node name="Fragment3" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-62.0, 0.0, -128.0)
+fragment_id = &"forest_3"
+ground_offset = 0.8
+
+[node name="Fragment4" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-1.5, 0.0, -110.5)
+fragment_id = &"forest_4"
+
+[node name="Fragment5" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-60.0, 0.0, -160.0)
+fragment_id = &"forest_5"
+hidden_until_scanned = true
+
+[node name="Fragment6" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-9.5, 0.0, -181.0)
+fragment_id = &"forest_6"
+
+[node name="Fragment7" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(-79.0, 0.0, -116.0)
+fragment_id = &"forest_7"
+
+[node name="Fragment8" parent="." instance=ExtResource("4_fragment")]
+position = Vector3(9.0, 0.0, -146.5)
+fragment_id = &"forest_8"
+
+[node name="SleepingCaretaker" parent="." instance=ExtResource("5_old_robot")]
+position = Vector3(7.0, 0.0, -149.5)
+rotation = Vector3(0, 3.490658503988659, 0)
+model = "the_ball"
+discovery_id = &"sleeping_caretaker"
+
+[node name="MushroomRing" parent="." instance=ExtResource("6_trigger")]
+position = Vector3(-80.0, 0.0, -118.0)
+discovery_id = &"mushroom_ring"
+size = Vector3(9, 6, 9)
+
+[node name="Switch1" parent="." instance=ExtResource("7_valve")]
+position = Vector3(-27.0, 0.0, -166.0)
+device_id = &"forest_switch_1"
+cable_points = PackedVector2Array(-20.0, -172.0, -12.0, -184.0, -6.0, -192.0, -3.5, -195.5)
+
+[node name="Switch2" parent="." instance=ExtResource("7_valve")]
+position = Vector3(13.0, 0.0, -171.0)
+device_id = &"forest_switch_2"
+cable_points = PackedVector2Array(9.0, -181.0, 2.0, -190.0, -3.5, -195.5)
+
+[node name="Switch3" parent="." instance=ExtResource("7_valve")]
+position = Vector3(-45.0, 0.0, -181.0)
+device_id = &"forest_switch_3"
+cable_points = PackedVector2Array(-34.0, -186.0, -20.0, -192.0, -10.0, -195.0, -3.5, -195.5)
+
+[node name="OldBridge" parent="." instance=ExtResource("2_bridge")]
+position = Vector3(1.0, 0.0, -197.5)
+device_id = &"old_bridge"
+
+[node name="SawBridge" parent="." instance=ExtResource("6_trigger")]
+position = Vector3(-2.0, 0.0, -188.0)
+flag = &"saw_bridge"
+size = Vector3(18, 6, 12)
+message = "The bridge is folded away. Its machine has no power."
