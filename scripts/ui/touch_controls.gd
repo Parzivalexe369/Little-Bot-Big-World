@@ -28,6 +28,11 @@ const TOUCH_GRACE_MS := 1000
 ## The stick keeps this far (CSS px) from the screen edges: Safari's swipe-back edge and the
 ## iPad home-bar gesture area would take touches there.
 const EDGE_CSS := 44.0
+## "No finger" for the stick, look and pinch slots. Finger ids can be any 32-bit number,
+## negative included: browsers pass on touch.identifier, and Safari's are large numbers that
+## arrive negative. So no -1 or "< 0" tests: a negative id made the stick look untouched,
+## and on iPad it never moved the robot.
+const NO_TOUCH := -9223372036854775807 - 1
 const FILL := Color(0.05, 0.06, 0.09, 0.42)
 const FILL_PRESSED := Color(0.5, 0.94, 1.0, 0.34)
 const EDGE := Color(1, 1, 1, 0.28)
@@ -53,16 +58,16 @@ var _stick_radius := 95.0
 var _stick_home := Vector2.ZERO
 var _stick_center := Vector2.ZERO
 var _stick_knob := Vector2.ZERO
-var _stick_index := -1
+var _stick_index := NO_TOUCH
 var _stick_boost := false
 var _boost_button := false
 var _boost_on := false
 var _move := Vector2.ZERO
-var _look_index := -1
+var _look_index := NO_TOUCH
 var _look_start_time := 0
 var _look_moved := 0.0
 var _look_on_prompt := false
-var _pinch_index := -1
+var _pinch_index := NO_TOUCH
 var _pinch_dist := 0.0
 var _touch_pos := {}
 var _down := {}
@@ -187,7 +192,7 @@ func _begin(idx: int, p: Vector2) -> void:
 	if button >= 0:
 		_held[idx] = button
 		_press(button)
-	elif mode == 2 and _stick_index < 0 and _in_stick_zone(p):
+	elif mode == 2 and _stick_index == NO_TOUCH and _in_stick_zone(p):
 		_stick_index = idx
 		_stick_center = _clamped_stick_center(p)
 		# Grabbing never moves the robot by itself (even where the stick had to be nudged
@@ -197,12 +202,12 @@ func _begin(idx: int, p: Vector2) -> void:
 		_update_stick()
 	else:
 		_touch_pos[idx] = p
-		if _look_index < 0:
+		if _look_index == NO_TOUCH:
 			_look_index = idx
 			_look_start_time = Time.get_ticks_msec()
 			_look_moved = 0.0
 			_look_on_prompt = hud != null and hud.prompt_rect().grow(_r * 0.4).has_point(p)
-		elif _pinch_index < 0 and mode == 2:
+		elif _pinch_index == NO_TOUCH and mode == 2:
 			_pinch_index = idx
 			_pinch_dist = (_touch_pos[_look_index] as Vector2).distance_to(p)
 
@@ -213,7 +218,7 @@ func _end(idx: int) -> void:
 		_release(_held[idx])
 		_held.erase(idx)
 	elif idx == _stick_index:
-		_stick_index = -1
+		_stick_index = NO_TOUCH
 		_stick_knob = _stick_home
 		_stick_center = _stick_home
 		_update_stick()
@@ -222,9 +227,9 @@ func _end(idx: int) -> void:
 		if tap and _look_on_prompt:
 			_tap("interact")
 		_look_index = _pinch_index
-		_pinch_index = -1
+		_pinch_index = NO_TOUCH
 	elif idx == _pinch_index:
-		_pinch_index = -1
+		_pinch_index = NO_TOUCH
 	_touch_pos.erase(idx)
 
 
@@ -249,7 +254,7 @@ func _on_drag(e: InputEventScreenDrag) -> void:
 	var delta := e.position - prev
 	_touch_pos[idx] = e.position
 	var rig := _rig()
-	if _pinch_index >= 0 and _touch_pos.has(_look_index) and _touch_pos.has(_pinch_index):
+	if _pinch_index != NO_TOUCH and _touch_pos.has(_look_index) and _touch_pos.has(_pinch_index):
 		var d := (_touch_pos[_look_index] as Vector2).distance_to(_touch_pos[_pinch_index])
 		if rig and _pinch_dist > 1.0 and d > 1.0:
 			rig.touch_zoom(_pinch_dist / d)
@@ -261,7 +266,7 @@ func _on_drag(e: InputEventScreenDrag) -> void:
 
 
 func _update_stick() -> void:
-	var v := (_stick_knob - _stick_center) / _stick_radius if _stick_index >= 0 else Vector2.ZERO
+	var v := (_stick_knob - _stick_center) / _stick_radius if _stick_index != NO_TOUCH else Vector2.ZERO
 	_stick_boost = v.length() > BOOST_RIM
 	_set_move(v.limit_length(1.0))
 	_update_boost()
@@ -336,15 +341,15 @@ func _release_all() -> void:
 	for idx: int in _held:
 		_release(_held[idx])
 	_held.clear()
-	_stick_index = -1
+	_stick_index = NO_TOUCH
 	_stick_knob = _stick_home
 	_stick_center = _stick_home
 	_stick_boost = false
 	_boost_button = false
 	_set_move(Vector2.ZERO)
 	_update_boost()
-	_look_index = -1
-	_pinch_index = -1
+	_look_index = NO_TOUCH
+	_pinch_index = NO_TOUCH
 	_touch_pos.clear()
 	_down.clear()
 	_stick_grab = Vector2.ZERO
@@ -380,7 +385,7 @@ func _layout() -> void:
 	_margin = maxf(_r * 0.55 + 18.0, EDGE_CSS / css_per_unit)
 	_stick_radius = _r * 1.85
 	_stick_home = Vector2(_margin + _stick_radius, _view.y - _margin - _stick_radius)
-	if _stick_index < 0:
+	if _stick_index == NO_TOUCH:
 		_stick_center = _stick_home
 		_stick_knob = _stick_home
 	var hop_r := _r * 1.3
@@ -426,7 +431,7 @@ func _clamped_stick_center(p: Vector2) -> Vector2:
 
 func _process(delta: float) -> void:
 	var mode := _mode()
-	if mode == 0 and (_stick_index >= 0 or not _held.is_empty()):
+	if mode == 0 and (_stick_index != NO_TOUCH or not _held.is_empty()):
 		_release_all()
 	_alpha = move_toward(_alpha, 1.0 if mode == 2 else 0.0, delta * 4.0)
 	_use_alpha = move_toward(_use_alpha, 1.0 if mode >= 1 else 0.0, delta * 4.0)
@@ -450,7 +455,7 @@ func _draw_controls() -> void:
 
 
 func _draw_stick(a: float) -> void:
-	var touching := _stick_index >= 0
+	var touching := _stick_index != NO_TOUCH
 	var base_a := a * (1.0 if touching else 0.8)
 	_surface.draw_circle(_stick_center, _stick_radius, Color(FILL, FILL.a * base_a))
 	var rim := Color(ENERGY, 0.9) if _stick_boost else Color(1, 1, 1, 0.45)

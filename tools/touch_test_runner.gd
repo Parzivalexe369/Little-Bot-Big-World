@@ -50,10 +50,17 @@ func _mirror_mouse(p: Vector2, relative: Vector2) -> void:
 	Input.parse_input_event(m)
 
 
+## The finger id a browser would report for finger n. Godot passes on touch.identifier, and
+## Safari's (iPad, iPhone) are large numbers that arrive as 32-bit values, often negative;
+## use ids like that so a test can't pass with small ids while an iPad fails.
+func _id(n: int) -> int:
+	return -1294967296 + n * 7919
+
+
 func _touch(index: int, p: Vector2, pressed: bool) -> void:
 	_mirror_mouse(p, Vector2.ZERO)
 	var e := InputEventScreenTouch.new()
-	e.index = index
+	e.index = _id(index)
 	e.position = _win(p)
 	e.pressed = pressed
 	Input.parse_input_event(e)
@@ -65,7 +72,7 @@ func _drag(index: int, from: Vector2, to: Vector2, steps := 8) -> void:
 		var p := from.lerp(to, float(i) / steps)
 		_mirror_mouse(p, _win(p) - _win(prev))
 		var e := InputEventScreenDrag.new()
-		e.index = index
+		e.index = _id(index)
 		e.position = _win(p)
 		# Like the browser, "relative" is unreliable with several fingers; send a wrong one.
 		e.relative = (_win(p) - _win(prev)) * 3.0
@@ -159,7 +166,7 @@ func _run() -> void:
 	await _frames(2)
 	for i in range(1, 9):
 		var e := InputEventScreenDrag.new()
-		e.index = 4
+		e.index = _id(4)
 		e.position = _win(b + Vector2(tc._view.x * 0.012 * i, 0))
 		e.relative = _win(Vector2(tc._view.x * 0.012, 0)) - _win(Vector2.ZERO)
 		Input.parse_input_event(e)
