@@ -51,6 +51,8 @@ func _ready() -> void:
 	SaveSystem.player_snapshot_provider = player.snapshot
 	_apply_saved_restoration()
 	_build_ambient_fx()
+	if OS.has_feature("web"):
+		WebDrawDistance.apply.call_deferred($Levels)
 	Events.restoration_requested.connect(director.play_restoration)
 	Events.look_at_requested.connect(director.look_at)
 	GameState.area_entered.connect(_on_area_entered)

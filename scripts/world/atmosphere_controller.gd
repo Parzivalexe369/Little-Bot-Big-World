@@ -51,6 +51,7 @@ var _current := {}
 var _restore := {&"meadow": 0.0, &"forest": 0.0, &"shrine": 0.0, &"garden": 0.0}
 var _override_weight := 0.0
 var _override := {}
+var _sky_sent := {}
 
 
 func setup(world_environment: WorldEnvironment, sun_light: DirectionalLight3D) -> void:
@@ -133,6 +134,10 @@ func setup(world_environment: WorldEnvironment, sun_light: DirectionalLight3D) -
 	sun.directional_shadow_split_2 = 0.15
 	sun.directional_shadow_split_3 = 0.4
 	sun.directional_shadow_fade_start = 0.85
+	if OS.has_feature("web"):
+		# Browsers: two cascades (each one redraws every shadow caster), the near one ~9 m.
+		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+		sun.directional_shadow_split_1 = 0.2
 	_current = MOODS[&"meadow"].duplicate()
 	apply_quality()
 	Settings.changed.connect(apply_quality)
@@ -140,7 +145,7 @@ func setup(world_environment: WorldEnvironment, sun_light: DirectionalLight3D) -
 
 func apply_quality() -> void:
 	var q := Settings.quality_params()
-	sun.directional_shadow_max_distance = q["shadow_distance"]
+	sun.directional_shadow_max_distance = minf(q["shadow_distance"], 45.0) if OS.has_feature("web") else q["shadow_distance"]
 	environment.ssao_enabled = q["ssao"]
 	environment.glow_enabled = q["glow"]
 	environment.ssr_enabled = q["ssr"]
@@ -235,11 +240,29 @@ func _apply(m: Dictionary) -> void:
 	environment.adjustment_saturation = m["saturation"]
 	environment.volumetric_fog_density = m["vol_fog"]
 	sun.light_volumetric_fog_energy = m["shafts"]
-	sky_material.set_shader_parameter("top_color", m["sky_top"])
-	sky_material.set_shader_parameter("horizon_color", m["sky_horizon"])
-	sky_material.set_shader_parameter("ground_color", (m["fog"] as Color).darkened(0.25))
-	sky_material.set_shader_parameter("sun_glow_color", m["glow"])
-	sky_material.set_shader_parameter("cloud_coverage", m["clouds"])
+	_sky_param("top_color", m["sky_top"])
+	_sky_param("horizon_color", m["sky_horizon"])
+	_sky_param("ground_color", (m["fog"] as Color).darkened(0.25))
+	_sky_param("sun_glow_color", m["glow"])
+	_sky_param("cloud_coverage", m["clouds"])
+
+
+## Sky values are only re-sent when they change visibly: each change re-renders the sky's
+## reflection map, and the mood blend nudges them a little every frame.
+func _sky_param(param: String, value: Variant) -> void:
+	var last: Variant = _sky_sent.get(param)
+	if last != null and _nearly(last, value):
+		return
+	_sky_sent[param] = value
+	sky_material.set_shader_parameter(param, value)
+
+
+static func _nearly(a: Variant, b: Variant) -> bool:
+	if a is Color:
+		var ca := a as Color
+		var cb := b as Color
+		return absf(ca.r - cb.r) < 0.003 and absf(ca.g - cb.g) < 0.003 and absf(ca.b - cb.b) < 0.003 and absf(ca.a - cb.a) < 0.003
+	return absf(float(a) - float(b)) < 0.002
 
 
 func _lerp_value(a: Variant, b: Variant, t: float) -> Variant:

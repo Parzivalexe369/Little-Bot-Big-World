@@ -84,12 +84,22 @@ Hosting that branch:
   60% on an iPad's high-density screen. Menus and text stay sharp, and Settings → Graphics
   → Render scale changes it.
 - "Quit" is hidden in browsers, because a web page cannot close its own tab.
-- On the first visit, the browser compiles the game's shaders while the loading screen is
-  up. On Windows this took about a minute for the garden and two to three minutes for the
-  sci-fi facility on a laptop with integrated graphics.
-- Later visits start quickly, because the browser caches compiled shaders.
-- Measured on that laptop (AMD integrated GPU, Chrome engine): the garden ran at about
-  30 fps and the facility at about 14 fps. A dedicated graphics card should do better.
+- Browsers are limited by draw calls (each drawn object goes through JavaScript and WebGL),
+  so the browser version draws less at a time:
+  - level objects stop drawing beyond a distance that grows with their size
+    (`scripts/systems/web_draw_distance.gd`);
+  - the sleeping robots are merged into one mesh per material;
+  - the sun uses two shadow cascades, and tiny parts cast no shadows;
+  - the facility draws only the area you are in;
+  - there is no depth pre-pass.
+  This took the garden from about 2,500 draw calls a frame to 600–1,100.
+- While the loading screen is up, the browser version draws the whole level and the common
+  effects once (`scripts/systems/shader_warmup.gd`). The browser then compiles their shaders
+  during loading, not the first time each thing appears in play. In a cold-compile test
+  this removed the in-play freezes (garden: 6 freezes totalling 12 s down to none;
+  facility: 7 totalling 12 s down to one of 0.2 s).
+- On the first visit, compiling those shaders takes a while; the loading screen says so.
+  Later visits start quickly, because the browser caches compiled shaders.
 
 ## Controls
 

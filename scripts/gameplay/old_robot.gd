@@ -25,6 +25,9 @@ func _ready() -> void:
 	add_child(_model)
 	RobotMaterials.apply(_model)
 	_collect_eyes()
+	if OS.has_feature("web"):
+		# Browsers: one draw call per material instead of one per part (190 parts).
+		WebDrawDistance.merge_static(_model)
 	_model.rotation.x = deg_to_rad(slump_degrees)
 	var body := StaticBody3D.new()
 	body.collision_layer = 1

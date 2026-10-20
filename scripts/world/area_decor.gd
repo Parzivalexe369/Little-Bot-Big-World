@@ -6,6 +6,9 @@ extends Node3D
 ## static colliders where props should block the robot.
 
 const CHUNK := 32.0
+## Browsers batch scatter in 64 m patches (a quarter as many WebGL draw calls for the same
+## view); desktop keeps the finer 32 m patches.
+static var chunk_size := 64.0 if OS.has_feature("web") else CHUNK
 
 @export var area_id: StringName = &"meadow"
 @export var scatter_seed := 1
@@ -208,7 +211,7 @@ func add_instance(prop: String, x: float, z: float, yaw: float, scale: float, y_
 		basis = Basis(Vector3(rng.randf_range(-1, 1), 0, rng.randf_range(-1, 1)).normalized(), deg_to_rad(rng.randf_range(0, tilt))) * basis
 	basis = basis.scaled(Vector3.ONE * scale)
 	var xf := Transform3D(basis, Vector3(x, y, z))
-	var chunk := Vector2i(floori(x / CHUNK), floori(z / CHUNK))
+	var chunk := Vector2i(floori(x / chunk_size), floori(z / chunk_size))
 	var key := "%s|%d|%d" % [prop, chunk.x, chunk.y]
 	if not _batches.has(key):
 		_batches[key] = {"prop": prop, "chunk": chunk, "xforms": [], "range": view_range}
@@ -257,7 +260,7 @@ func _flush_batches() -> void:
 			continue
 		var xforms: Array = batch["xforms"]
 		var chunk: Vector2i = batch["chunk"]
-		var center := Vector3((chunk.x + 0.5) * CHUNK, 0.0, (chunk.y + 0.5) * CHUNK)
+		var center := Vector3((chunk.x + 0.5) * chunk_size, 0.0, (chunk.y + 0.5) * chunk_size)
 		var avg_y := 0.0
 		for xf: Transform3D in xforms:
 			avg_y += xf.origin.y
@@ -278,5 +281,9 @@ func _flush_batches() -> void:
 			mmi.visibility_range_end = view_range
 			mmi.visibility_range_end_margin = view_range * 0.15
 			mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		if OS.has_feature("web") and mesh.get_aabb().size.length() < 2.5:
+			# Browsers: pebbles, twigs, leaves and small flowers cast no shadows (too small to
+			# see, but each shadow cascade would redraw them).
+			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(mmi)
 	_batches.clear()

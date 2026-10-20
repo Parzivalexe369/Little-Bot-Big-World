@@ -31,6 +31,9 @@ var sun: DirectionalLight3D
 var grade: ShaderMaterial
 var areas: Array[FacilityArea] = []
 var _mood := {}
+var _sky_sent := {}
+var _drawn_area: FacilityArea
+var _areas_culled := false
 var _area_timer := 0.0
 
 
@@ -155,6 +158,8 @@ func show_point(target: Vector3, duration: float) -> void:
 
 func _process(delta: float) -> void:
 	RenderingServer.global_shader_parameter_set(&"player_position", player.global_position)
+	if OS.has_feature("web"):
+		_cull_areas()
 	_area_timer -= delta
 	if _area_timer <= 0.0:
 		_area_timer = 0.3
@@ -165,6 +170,19 @@ func _process(delta: float) -> void:
 		var a: Variant = _mood.get(key, target[key])
 		_mood[key] = (a as Color).lerp(target[key], k) if a is Color else lerpf(a, target[key], k)
 	_apply_mood(_mood)
+
+
+## Browsers: only the area the robot is in is drawn. The areas sit 300 m apart (lifts and
+## portals jump between them), but the camera still drew the others through the walls, up to
+## ~750 extra WebGL draw calls a frame. Between areas, everything is shown.
+func _cull_areas() -> void:
+	var here := current_area()
+	if _areas_culled and here == _drawn_area:
+		return
+	_areas_culled = true
+	_drawn_area = here
+	for area in areas:
+		area.visible = here == null or area == here
 
 
 func current_area() -> FacilityArea:
@@ -305,8 +323,13 @@ func _apply_mood(m: Dictionary) -> void:
 	environment.glow_intensity = m["glow"]
 	environment.tonemap_exposure = m["exposure"]
 	environment.adjustment_saturation = m["saturation"]
-	sky_material.set_shader_parameter("nebula_amount", m["nebula"])
-	sky_material.set_shader_parameter("planet_size", m["planet"])
+	# Sky values only change the sky when they move visibly: each change re-renders its
+	# reflection map, and the mood blend nudges them every frame.
+	for param: String in ["nebula_amount", "planet_size"]:
+		var value: float = m["nebula"] if param == "nebula_amount" else m["planet"]
+		if not _sky_sent.has(param) or absf(float(_sky_sent[param]) - value) >= 0.002:
+			_sky_sent[param] = value
+			sky_material.set_shader_parameter(param, value)
 	environment.sdfgi_energy = m["gi"]
 	sun.light_energy = m["sun"]
 	sun.light_color = m["sun_color"]

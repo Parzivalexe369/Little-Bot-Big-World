@@ -17,6 +17,7 @@ What the copy gets (the desktop project is never modified):
     panels alone use ~550 (facility power on panels then simply stays on)
   * sci-fi panels: no parallax seams, and scan colours normalised so walls are not washed out
   * shared effect particles: no turbulence or soft depth fade (minute-long WebGL compile)
+  * no depth pre-pass (doubles draw work; iPad GPUs remove hidden surfaces themselves)
 Then it imports, exports the Web preset (single-threaded, no special server headers needed)
 into --out, adds the mobile pack and touch-friendly page settings (no text selection or
 callouts on long presses, full screen when added to an iPad/iPhone home screen), and checks
@@ -172,6 +173,10 @@ def web_project_settings(work):
     if "textures/vram_compression/import_etc2_astc=true" not in s:
         s = s.replace("\n[rendering]\n", "\n[rendering]\n\ntextures/vram_compression/import_etc2_astc=true\n", 1)
     s = s.replace("lights_and_shadows/directional_shadow/size=4096", "lights_and_shadows/directional_shadow/size=2048")
+    # No depth pre-pass: it doubles the draw work, and the browser is limited by draw calls
+    # (iPad GPUs also remove hidden surfaces themselves; WebGL hides the vendor, so Godot's
+    # own "off for Apple GPUs" rule never applies).
+    s = s.replace("\n[rendering]\n", "\n[rendering]\n\ndriver/depth_prepass/enable=false\n", 1)
     open(p, "w", encoding="utf-8").write(s)
 
 

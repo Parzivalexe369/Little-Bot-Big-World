@@ -97,7 +97,26 @@ static func place(parent: Node, prop: String, pos: Vector3, yaw_deg: float = 0.0
 	node.scale = Vector3.ONE * scale
 	if collision:
 		add_collision(node, prop)
+	if OS.has_feature("web"):
+		_limit_draw_distance(node, scale)
 	return node
+
+
+## Browsers: a prop stops drawing beyond a distance that grows with its size (flowers ~45 m,
+## big rocks ~60 m, trunks and giant mushrooms up to 160 m). Every drawn object is a WebGL
+## draw call, and distant props made up most of the garden's ~2,500 a frame.
+static func _limit_draw_distance(node: Node3D, scale: float) -> void:
+	var meshes: Array = node.find_children("*", "MeshInstance3D", true, false)
+	if node is MeshInstance3D:
+		meshes.append(node)
+	var size := 0.0
+	for mi: MeshInstance3D in meshes:
+		if mi.mesh:
+			size = maxf(size, mi.mesh.get_aabb().size.length())
+	var view_range := clampf(20.0 + size * scale * 8.0, 45.0, 160.0)
+	for mi: MeshInstance3D in meshes:
+		mi.visibility_range_end = view_range
+		mi.visibility_range_end_margin = view_range * 0.1
 
 
 ## root_only skips moving child parts (devices give those their own colliders).

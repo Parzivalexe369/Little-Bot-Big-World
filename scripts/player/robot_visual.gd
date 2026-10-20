@@ -78,6 +78,10 @@ func _ready() -> void:
 	if not cast_shadows:
 		for mi in model.find_children("*", "MeshInstance3D", true, false):
 			(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	elif OS.has_feature("web"):
+		# Browsers: bolts and trims inside the body's outline cast no shadow (the same shadow
+		# shape, ~90 fewer draw calls in every shadow cascade).
+		WebDrawDistance.no_tiny_shadows(model, 0.2)
 	_install_eye_glow_tracks()
 	_build_animation_tree()
 	face = RobotFaceModifier.new()

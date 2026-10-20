@@ -735,7 +735,7 @@ func _build_hidden_lab() -> void:
 	var seed := ScifiKit.energy_mesh(self, seed_mesh, Vector3(22.0, 3.6, -5.0), Color(0.4, 1.0, 0.35), Color(0.95, 1.0, 0.7), 2.4)
 	seed.name = "GardenSeed"
 	var seed_light := ScifiKit.light(self, Vector3(22.0, 3.6, -5.0), Color(0.5, 1.0, 0.4), 1.6, 6.0)
-	seed_light.shadow_enabled = true
+	seed_light.shadow_enabled = not OS.has_feature("web")
 	ScifiKit.light(self, Vector3(20.0, 5.0, 1.0), Color(0.7, 0.45, 1.0), 0.9, 7.0)
 	ScifiKit.place(self, "sf_table", Vector3(24.5, 2.2, 0.5), 90.0)
 	_screens.append(ScifiKit.place(self, "sf_console", Vector3(19.2, 2.2, 1.5), 90.0))
@@ -1039,6 +1039,10 @@ func _build_effects() -> void:
 
 ## Box-projected reflections for each room (metal and polished floors mirror the room).
 func _build_probes() -> void:
+	# Browsers: none. Under the WebGL renderer the probes kept re-rendering the whole lab every
+	# frame (~750 draw calls, even from the other areas); metals reflect the sky instead.
+	if OS.has_feature("web"):
+		return
 	for room: Array in [[Vector3(0, 2.5, 25), Vector3(16, 5, 14)], [Vector3(-14, 2.5, 24), Vector3(12, 5, 14)],
 			[Vector3(0, 2.0, 13), Vector3(5, 4, 10)], [Vector3(0, 3.0, -3), Vector3(28, 6, 22)],
 			[Vector3(22, 3.8, -2), Vector3(8, 3.2, 12)], [Vector3(-11, 2.0, -19), Vector3(5, 4, 10)],

@@ -117,6 +117,11 @@ func go_to(path: String, fade_time: float = 0.6) -> void:
 ## smoothly again, so the scene does not start (or fade in) in jerks.
 func _settle_shaders() -> void:
 	get_tree().paused = true
+	# Draw the whole level and the common effects once now, so their shaders do not compile
+	# (and freeze the game) the first time each one appears in play.
+	var scene := get_tree().current_scene
+	if scene is Node3D:
+		await ShaderWarmup.run(scene as Node3D)
 	var smooth := 0
 	var start := Time.get_ticks_msec()
 	var last := start
