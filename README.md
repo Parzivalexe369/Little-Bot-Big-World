@@ -100,13 +100,22 @@ Hosting that branch:
   - the facility draws only the area you are in;
   - there is no depth pre-pass.
   This took the garden from about 2,500 draw calls a frame to 340–560.
-- While the loading screen is up, the browser version draws the whole level and the common
-  effects once (`scripts/systems/shader_warmup.gd`). The browser then compiles their shaders
-  during loading, not the first time each thing appears in play. In a cold-compile test
-  this removed the in-play freezes (garden: 6 freezes totalling 12 s down to none;
-  facility: 7 totalling 12 s down to one of 0.2 s).
-- On the first visit, compiling those shaders takes a while; the loading screen says so.
-  Later visits start quickly, because the browser caches compiled shaders.
+- Browsers compile each shader on the page's only thread the first time something uses it:
+  on a first visit (or after an update that changes shaders) one material takes several
+  seconds, and a whole scene at once froze the page for over two minutes, long enough for
+  Chrome to call it unresponsive (it does so after 15 s without a break). So the browser
+  version spreads that work out (`scripts/systems/shader_warmup.gd`):
+  - the main menu's first frame draws only the menu; its 3D scene is then built and shown one
+    new material per frame behind a plain backdrop, with a "Preparing graphics" count;
+  - levels load in separate steps (file, scene, the garden's four areas and its grass each in
+    a frame of their own), then the loading screen reveals the whole level from above, one
+    new material per frame (with the same count), so nothing compiles later during play;
+  - the terrain's cliff moss and the robot shell's orange-peel wobble are simplified in the
+    browser build, because their shaders alone took 15-18 s to compile.
+
+  On the development PC a cold first visit takes about two minutes for the menu and three to
+  four for each of the garden and the facility, with no frame over about 15 s. Later visits
+  start quickly, because the browser caches compiled shaders.
 
 ## Controls
 

@@ -95,17 +95,37 @@ func go_to(path: String, fade_time: float = 0.6) -> void:
 	await fade_out(fade_time)
 	_loading.text = {WORLD: "Waking up...", FACILITY: "Descending..."}.get(path, "Returning...")
 	if OS.has_feature("web") and path != MAIN_MENU:
-		_loading.text += "\nThe first visit can take a minute or two."
+		_loading.text += "\nThe first visit can take a few minutes."
 	_loading.modulate.a = 0.8
 	await get_tree().process_frame
 	await get_tree().process_frame
 	get_tree().paused = false
-	var err := get_tree().change_scene_to_file(path)
+	if OS.has_feature("web") and path != MAIN_MENU:
+		# No 3D drawing until ShaderWarmup takes over: the new level's first frames would
+		# otherwise compile every shader in view at once (see ShaderWarmup).
+		get_viewport().disable_3d = true
+	var err := OK
+	if OS.has_feature("web") and path != MAIN_MENU:
+		# Load, build and start the level in three separate frames: in one go it can take
+		# longer than the 15 s after which Chrome calls the page unresponsive.
+		var packed := load(path) as PackedScene
+		await get_tree().process_frame
+		var scene: Node = packed.instantiate() if packed else null
+		await get_tree().process_frame
+		err = get_tree().change_scene_to_node(scene) if scene else ERR_CANT_OPEN
+	else:
+		err = get_tree().change_scene_to_file(path)
 	if err != OK:
 		push_error("Could not change scene to %s (%s)" % [path, error_string(err)])
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if OS.has_feature("web") and path != MAIN_MENU:
+		# The garden builds its areas and grass over the next frames (AreaDecor, GrassField).
+		get_tree().paused = true
+		while AreaDecor.building > 0:
+			await get_tree().process_frame
+		for i in 3:
+			await get_tree().process_frame
 		await _settle_shaders()
 	_busy = false
 	_loading.modulate.a = 0.0
@@ -121,7 +141,11 @@ func _settle_shaders() -> void:
 	# (and freeze the game) the first time each one appears in play.
 	var scene := get_tree().current_scene
 	if scene is Node3D:
-		await ShaderWarmup.run(scene as Node3D)
+		var base := _loading.text
+		await ShaderWarmup.run(scene as Node3D, func(done: int, total: int) -> void:
+			_loading.text = "%s\nPreparing graphics...  %d / %d" % [base, done, total])
+		_loading.text = base
+	get_viewport().disable_3d = false
 	var smooth := 0
 	var start := Time.get_ticks_msec()
 	var last := start

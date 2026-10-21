@@ -35,6 +35,11 @@ var _collision_body: StaticBody3D
 var _density := 1.0
 
 
+## Browsers: areas still building (each builds in a frame of its own; see _ready).
+static var building := 0
+static var _turn := 0
+
+
 func _ready() -> void:
 	add_to_group(&"area_decor")
 	rng.seed = scatter_seed
@@ -43,11 +48,23 @@ func _ready() -> void:
 	_collision_body.name = "DecorCollision"
 	_collision_body.collision_layer = 1
 	add_child(_collision_body)
+	if OS.has_feature("web"):
+		# Browsers: the four areas together took ~8 s of one frame (Chrome calls a page
+		# unresponsive after 15 s without a break), so each builds in its own frame. The
+		# loading screen waits for them (SceneRouter), and so does the grass.
+		building += 1
+		_turn += 1
+		for i in _turn:
+			await get_tree().process_frame
 	_collect_gameplay_exclusions()
 	build_landmarks()
 	build_scatter()
 	build_clutter()
 	_flush_batches()
+	if OS.has_feature("web"):
+		building -= 1
+		if building == 0:
+			_turn = 0
 
 
 ## Override: hand-placed props.

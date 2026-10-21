@@ -18,6 +18,14 @@ func _ready() -> void:
 	_noise.seed = 31
 	_noise.frequency = 0.045
 	# Build after the area scenes so their solid props can be kept free of grass.
+	if OS.has_feature("web"):
+		# Browsers build the areas over several frames (AreaDecor), then the grass in its own.
+		await get_tree().process_frame
+		while AreaDecor.building > 0:
+			await get_tree().process_frame
+		await get_tree().process_frame
+		build()
+		return
 	build.call_deferred()
 
 

@@ -29,8 +29,11 @@ func _ready() -> void:
 	GameState.in_gameplay = false
 	get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	_build_diorama()
-	_build_ui()
+	if OS.has_feature("web"):
+		_start_web()
+	else:
+		_build_diorama()
+		_build_ui()
 	Audio.stop_all_ambient(1.0)
 	Audio.play_music(&"menu", 2.5)
 	Audio.set_ambient(&"meadow_base", 0.6, 3.0, -10.0)
@@ -58,6 +61,60 @@ func _process(delta: float) -> void:
 
 
 # --- Diorama ------------------------------------------------------------------------
+
+## Browsers: the game's first frame runs in one go with the engine's start-up (about 11 s of
+## its own on a first visit), and Chrome calls a page unresponsive after 15 s without a
+## break. So the first frame draws only the menu; the diorama is built in the next one and
+## its shaders compile a material per frame (ShaderWarmup) behind a plain backdrop that
+## fades out once everything is drawn.
+func _start_web() -> void:
+	set_process(false)
+	get_viewport().disable_3d = true
+	var cover := _build_cover()
+	_build_ui()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_build_diorama()
+	set_process(true)
+	await _reveal_diorama(cover)
+
+
+func _build_cover() -> ColorRect:
+	var layer := CanvasLayer.new()
+	layer.layer = 0
+	add_child(layer)
+	var cover := ColorRect.new()
+	cover.color = Color(0.07, 0.08, 0.1)
+	cover.set_anchors_preset(Control.PRESET_FULL_RECT)
+	cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(cover)
+	var note := Label.new()
+	note.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	note.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	note.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	note.offset_bottom = -90.0
+	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	note.add_theme_font_size_override("font_size", 22)
+	note.modulate = Color(1, 1, 1, 0.75)
+	note.visible = false
+	note.name = "Note"
+	cover.add_child(note)
+	return cover
+
+
+func _reveal_diorama(cover: ColorRect) -> void:
+	var note := cover.get_node("Note") as Label
+	var start := Time.get_ticks_msec()
+	await ShaderWarmup.reveal_gradually(self, false, func(done: int, total: int) -> void:
+		# Only a slow (first) visit shows it; with cached shaders this is over in a moment.
+		if Time.get_ticks_msec() - start > 1500:
+			note.visible = true
+			note.text = "Preparing graphics...  %d / %d\nThe first visit takes a few minutes. Later visits start quickly." % [done, total])
+	note.visible = false
+	var tween := create_tween()
+	tween.tween_property(cover, "color:a", 0.0, 0.8)
+	tween.tween_callback(cover.get_parent().queue_free)
+
 
 func _build_diorama() -> void:
 	var env := WorldEnvironment.new()

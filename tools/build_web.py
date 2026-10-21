@@ -153,6 +153,31 @@ WEB_PATCHES = [
     # logs "shader type fog not supported"); the mist was never drawn there anyway.
     ("scripts/world/water_bodies.gd", "\tfog.size = size\n\tvar fm := FogMaterial.new()\n",
      "\tfog.size = size\n\tif OS.has_feature(\"web\"):\n\t\tadd_child(fog)\n\t\treturn fog\n\tvar fm := FogMaterial.new()\n"),
+    # Terrain: moss on cliff ledges is a green tint instead of a second triplanar texture set.
+    # The terrain was the slowest shader to compile (~18 s in one frame on a first visit,
+    # close to the point where Chrome calls the page unresponsive).
+    ("shaders/terrain.gdshader",
+     "\t\tif (moss_mask > 0.01) {\n"
+     "\t\t\tvec3 m_alb; vec3 m_nrm; vec3 m_arm;\n"
+     "\t\t\ttriplanar(7.0, world_pos, n_geo, bw, cliff_scale * 2.2, m_alb, m_nrm, m_arm);\n"
+     "\t\t\tfloat mb = height_blend(moss_mask, c_arm.r, m_arm.r, 0.14);\n"
+     "\t\t\tc_alb = mix(c_alb, m_alb * mix(vec3(1.0), vec3(0.9, 1.0, 0.8), forest), mb);\n"
+     "\t\t\tc_nrm = normalize(mix(c_nrm, m_nrm, mb));\n"
+     "\t\t\tc_arm = mix(c_arm, m_arm, mb);\n"
+     "\t\t}\n",
+     "\t\tc_alb = mix(c_alb, c_alb * vec3(0.62, 0.8, 0.45), moss_mask * 0.7);\n"),
+    # Robot shell: no orange-peel normal wobble (six more noise lookups, a barely visible
+    # effect); its shader took 14-18 s to compile, over Chrome's 15 s limit.
+    ("shaders/robot_candy.gdshader",
+     "\tif (peel_strength > 0.0) {\n"
+     "\t\tvec3 p = v_local * 260.0;\n"
+     "\t\tvec3 g = vec3(vnoise3(p + vec3(0.5, 0.0, 0.0)) - vnoise3(p - vec3(0.5, 0.0, 0.0)),\n"
+     "\t\t\tvnoise3(p + vec3(0.0, 0.5, 0.0)) - vnoise3(p - vec3(0.0, 0.5, 0.0)),\n"
+     "\t\t\tvnoise3(p + vec3(0.0, 0.0, 0.5)) - vnoise3(p - vec3(0.0, 0.0, 0.5)));\n"
+     "\t\tvec3 g_view = (VIEW_MATRIX * MODEL_MATRIX * vec4(g, 0.0)).xyz;\n"
+     "\t\tNORMAL = normalize(NORMAL + g_view * 0.035 * peel_strength);\n"
+     "\t}\n",
+     ""),
 ]
 
 

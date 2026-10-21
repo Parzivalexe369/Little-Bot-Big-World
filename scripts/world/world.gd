@@ -52,10 +52,7 @@ func _ready() -> void:
 	_apply_saved_restoration()
 	_build_ambient_fx()
 	if OS.has_feature("web"):
-		WebDrawDistance.apply.call_deferred($Levels)
-		WebDrawDistance.no_local_shadows.call_deferred($Levels)
-		if Settings.is_touch_web():
-			WebDrawDistance.only_shadows_from.call_deferred(self, player)
+		_tune_for_web()
 	Events.restoration_requested.connect(director.play_restoration)
 	Events.look_at_requested.connect(director.look_at)
 	GameState.area_entered.connect(_on_area_entered)
@@ -74,6 +71,18 @@ func _ready() -> void:
 	atmosphere.snap()
 	_update_audio(true)
 
+
+
+## Browsers: draw distances and shadow limits (WebDrawDistance), once the areas, which build
+## over several frames in browsers (AreaDecor), have placed their props.
+func _tune_for_web() -> void:
+	await get_tree().process_frame
+	while AreaDecor.building > 0:
+		await get_tree().process_frame
+	WebDrawDistance.apply($Levels)
+	WebDrawDistance.no_local_shadows($Levels)
+	if Settings.is_touch_web():
+		WebDrawDistance.only_shadows_from(self, player)
 
 func _apply_saved_restoration() -> void:
 	var v := Vector4.ZERO

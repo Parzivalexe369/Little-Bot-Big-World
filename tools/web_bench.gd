@@ -31,6 +31,14 @@ func _run() -> void:
 			Settings.apply_display()
 	elif OS.get_cmdline_user_args().has("facility"):
 		which = "facility"
+	if which == "new_game" or which == "travel_lab":
+		# A real start (or a trip to the facility): the loading screen and shader warm-up run
+		# as for a player; with a cold browser, the console shows any slow warm-up frames.
+		if which == "new_game":
+			SceneRouter.start_new_game()
+		else:
+			SceneRouter.travel_to(&"lab")
+		return
 	if which == "empty":
 		# Baseline: an empty 3D scene shows the browser's own cost per frame.
 		var cam := Camera3D.new()
